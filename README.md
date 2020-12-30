@@ -32,10 +32,8 @@ mkdir -p example/output/
 crdoc --config-dir config --resources-dir example/crds --output-dir example/output
 ```
 
-## Restrictions and limitations
+## Limitations
 
-- `config-dir` and any subfolder within it must only include `CustomResourceDefinition` YAML files.
-- A YAML file must contain exactly one `CustomResourceDefinition` definition.
-- Only apiVersions `apiextensions.k8s.io/v1` and `apiextensions.k8s.io/v1beta1` are supported.
-- There are no custom type information because this information is not available in the YAMLs
-- Currently a single markdown file is generated name `out.md`
+- Supported apiVersions are `apiextensions.k8s.io/v1` and `apiextensions.k8s.io/v1beta1`.
+- There are no custom type information because this information is not available in the YAMLs.
+- Currently a single markdown file is generated name `out.md`.

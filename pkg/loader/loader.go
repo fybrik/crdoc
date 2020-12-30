@@ -1,6 +1,8 @@
 package loader
 
 import (
+	"bytes"
+	"io"
 	"io/ioutil"
 	"path"
 	"path/filepath"
@@ -36,23 +38,54 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 	}
 
 	resources := []*apiextensions.CustomResourceDefinition{}
+
 	for _, filepath := range files {
-		crd, err := LoadCRD(filepath)
+		// Read file
+		filecontent, err := ioutil.ReadFile(filepath)
 		if err != nil {
 			return nil, err
 		}
-		resources = append(resources, crd)
+
+		// Split if multiple YAML documents are defined in the file
+		fileDocuments, err := loadYAMLDocuments(filecontent)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, document := range fileDocuments {
+			crd, err := DecodeCRD(document)
+			if err != nil {
+				return nil, err
+			}
+			if crd != nil {
+				resources = append(resources, crd)
+			}
+		}
 	}
 
 	return resources, nil
 }
 
-func LoadCRD(filepath string) (*apiextensions.CustomResourceDefinition, error) {
-	filecontent, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		return nil, err
+func loadYAMLDocuments(filecontent []byte) ([][]byte, error) {
+	dec := yaml.NewDecoder(bytes.NewReader(filecontent))
+
+	var res [][]byte
+	for {
+		var value interface{}
+		err := dec.Decode(&value)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		valueBytes, err := yaml.Marshal(value)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, valueBytes)
 	}
-	return DecodeCRD(filecontent)
+	return res, nil
 }
 
 func DecodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) {
@@ -68,6 +101,15 @@ func DecodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) 
 	obj, _, err := decode(content, nil, nil)
 	if err != nil {
 		return nil, err
+	}
+
+	obj, _, err = decode(content, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if obj.GetObjectKind().GroupVersionKind().Kind != "CustomResourceDefinition" {
+		return nil, nil
 	}
 
 	crd := &apiextensions.CustomResourceDefinition{}

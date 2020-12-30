@@ -1,7 +1,9 @@
 ---
-title: "{{.Metadata.Title}}"
-weight: {{.Metadata.Weight}}
-description: "{{.Metadata.Description}}"
+title: {{or .Metadata.Title "API Reference"}}
+weight: {{or .Metadata.Weight 1 }}
+{{- if .Metadata.Description}}
+description: {{.Metadata.Description}}
+{{- end}}
 ---
 
 Packages:
