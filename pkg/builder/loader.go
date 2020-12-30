@@ -105,11 +105,6 @@ func decodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) 
 		return nil, err
 	}
 
-	obj, _, err = decode(content, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-
 	if obj.GetObjectKind().GroupVersionKind().Kind != "CustomResourceDefinition" {
 		return nil, nil
 	}

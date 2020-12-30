@@ -174,8 +174,7 @@ func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (strin
 
 // headingID returns the ID built by hugo for a given header
 func headingID(s string) string {
-	result := s
-	result = strings.ToLower(s)
+	result := strings.ToLower(s)
 	result = strings.TrimSpace(result)
 	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
 	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
