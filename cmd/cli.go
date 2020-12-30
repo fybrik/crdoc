@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	pkg "github.com/roee88/crdoc/pkg/loader"
+	pkg "github.com/roee88/crdoc/pkg/builder"
 )
 
 const (

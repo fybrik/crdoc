@@ -1,4 +1,4 @@
-package loader
+package builder
 
 type Model struct {
 	Metadata PageMetadata  `yaml:"metadata"`
