@@ -1,0 +1,81 @@
+---
+title: "{{.Metadata.Title}}"
+weight: {{.Metadata.Weight}}
+description: "{{.Metadata.Description}}"
+---
+
+Packages:
+{{range .Groups}}
+- [{{.Metadata.Title}}](#{{.Group}}/{{.Version}})
+{{end}}{{/* range .Groups */}}
+
+{{range .Groups}}
+{{$group := .}}
+# {{.Group}}/{{.Version}}
+
+{{.Metadata.Description}}
+
+Resource Types:
+{{range .Kinds}}
+- [{{.Metadata.Title}}](#{{.Name}})
+{{end}}{{/* range .Kinds */}}
+
+{{range .Kinds}}
+{{$kind := .}}
+## {{.Name}}
+
+{{.Metadata.Description}}
+
+{{range .Types}}
+
+### {{.Name}}
+
+{{.Description}}
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+    </thead>
+    <tbody>
+      {{- if eq .Name $kind.Name -}}
+      <tr>
+      <td><b>apiVersion</b></td>
+      <td>string</td>
+      <td>{{$group.Group}}/{{$group.Version}}</td>
+      <td>true</td>
+      </tr>
+      <tr>
+      <td><b>kind</b></td>
+      <td>string</td>
+      <td>{{$kind.Name}}</td>
+      <td>true</td>
+      </tr>
+      <tr>
+      <td><b>metadata</b></td>
+      <td><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">ObjectMeta</a></td>
+      <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
+      <td>true</td>
+      </tr>
+      {{- end -}}
+      {{- range .Fields -}}
+      {{$special := list "apiVersion" "kind" "metadata"}}
+      {{- if not (has .Name $special) -}}
+      <tr>
+        <td><b>{{.Name}}</b></td>
+        <td>{{.Typename}}</td>
+        <td>{{.Description}}</td>
+        <td>{{.Required}}</td>
+      </tr>
+      {{- end -}}
+      {{- end -}}
+    </tbody>
+</table>
+
+{{- end}}{{/* range .Types */}}
+{{- end}}{{/* range .Kinds */}}
+{{- end}}{{/* range .Groups */}}
