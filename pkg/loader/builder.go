@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
@@ -16,7 +17,19 @@ type ModelBuilder struct {
 	Strict       bool
 	TemplatesDir string
 	OutputDir    string
-	// Links        map[string]string
+	Links        map[string]int
+}
+
+func (b *ModelBuilder) Write() error {
+	filename := path.Join(b.OutputDir, "out.md")
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	t := template.Must(template.New("all.tmpl").Funcs(sprig.TxtFuncMap()).ParseFiles(fmt.Sprintf("%s/all.tmpl", b.TemplatesDir)))
+	return t.Execute(f, *b.Model)
 }
 
 func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
@@ -42,12 +55,12 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 			log.Info("adding group ", groupModel)
 			b.Model.Groups = append(b.Model.Groups, groupModel)
 		}
-		if groupModel.Metadata.Title == "" {
-			groupModel.Metadata.Title = gv
-		}
-		if groupModel.Metadata.Description == "" {
-			groupModel.Metadata.Description = fmt.Sprintf("API Reference for %s", gv)
-		}
+		// if groupModel.Metadata.Title == "" {
+		// 	groupModel.Metadata.Title = gv
+		// }
+		// if groupModel.Metadata.Description == "" {
+		// 	groupModel.Metadata.Description = fmt.Sprintf("API Reference for %s", gv)
+		// }
 
 		// Find matching kind
 		kindModel := groupModel.findKindModel(kind)
@@ -62,12 +75,12 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 			log.Info("adding kind ", kindModel)
 			groupModel.Kinds = append(groupModel.Kinds, kindModel)
 		}
-		if kindModel.Metadata.Title == "" {
-			kindModel.Metadata.Title = kind
-		}
-		if kindModel.Metadata.Description == "" {
-			kindModel.Metadata.Description = fmt.Sprintf("API Reference for %s (%s)", kind, gv)
-		}
+		// if kindModel.Metadata.Title == "" {
+		// 	kindModel.Metadata.Title = kind
+		// }
+		// if kindModel.Metadata.Description == "" {
+		// 	kindModel.Metadata.Description = fmt.Sprintf("API Reference for %s (%s)", kind, gv)
+		// }
 
 		// Find schema
 		validation := version.Schema
@@ -78,53 +91,103 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 		schema := validation.OpenAPIV3Schema
 
 		// Recusively add type models
-		b.addTypeModels(kindModel, kind, schema, true)
+		_ = b.addTypeModels(groupModel, kindModel, []string{}, kind, schema, true)
 	}
 
 	return nil
 }
 
-func (b *ModelBuilder) Write() error {
-	filename := path.Join(b.OutputDir, "out.md")
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
+func (b *ModelBuilder) createLink(name string) string {
+	link := fmt.Sprintf("#%s", headingID(name))
+	if b.Links == nil {
+		b.Links = make(map[string]int)
 	}
-	defer f.Close()
-
-	t := template.Must(template.New("all.tmpl").Funcs(sprig.TxtFuncMap()).ParseFiles(fmt.Sprintf("%s/all.tmpl", b.TemplatesDir)))
-	return t.Execute(f, *b.Model)
+	if value, exists := b.Links[link]; exists {
+		value += 1
+		link = fmt.Sprintf("%s-%d", link, value)
+	} else {
+		b.Links[link] = 0
+	}
+	return link
 }
 
-func (b *ModelBuilder) addTypeModels(kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) {
+func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel,
+	prefix []string, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) *TypeModel {
+
+	fullName := strings.Join(append(prefix, name), ".")
 	typeModel := &TypeModel{
-		Name:        name,
+		Name:        fullName,
+		Key:         b.createLink(fullName),
 		Description: schema.Description,
-		Link:        fmt.Sprintf("#%s", headingID(name)),
 	}
 	kindModel.Types = append(kindModel.Types, typeModel)
-	log.Info("adding type ", typeModel)
+	// log.Info("adding type ", typeModel)
 
 	for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
-		log.Info("adding field ", fieldName)
+		// log.Info("adding field ", fieldName)
 		property := schema.Properties[fieldName]
 		typename, typekey := getTypeNameAndKey(fieldName, property)
 		fieldModel := &FieldModel{
-			Name:        fieldName,
+			Name: fieldName,
+			Type: typename,
+			// TypeKey:     typekey, // TODO: handle as link
 			Description: property.Description,
-			Typename:    typename,
-			Typekey:     typekey, // TODO: handle as link
 			Required:    isRequired(fieldName, schema.Required),
 		}
 		typeModel.Fields = append(typeModel.Fields, fieldModel)
 
-		// Recurse if type is array
-		if property.Type == "array" {
-			b.addTypeModels(kindModel, *typekey, property.Items.Schema, false)
-		} else if property.Type == "object" && property.AdditionalProperties != nil {
-			b.addTypeModels(kindModel, *typekey, property.AdditionalProperties.Schema, false)
-		} else if property.Type == "object" && property.Properties != nil {
-			b.addTypeModels(kindModel, *typekey, &property, false)
+		if typekey != nil {
+			var tm *TypeModel = nil
+			if property.Type == "array" {
+				tm = b.addTypeModels(groupModel, kindModel,
+					append(prefix, name), fmt.Sprintf("%s[index]", fieldName), property.Items.Schema, false)
+			} else if property.Type == "object" && property.AdditionalProperties != nil {
+				tm = b.addTypeModels(groupModel, kindModel,
+					append(prefix, name), fmt.Sprintf("%s[key]", fieldName), property.AdditionalProperties.Schema, false)
+			} else if property.Type == "object" && property.Properties != nil {
+				tm = b.addTypeModels(groupModel, kindModel,
+					append(prefix, name), fieldName, &property, false)
+			}
+			if tm != nil {
+				tm.ParentKey = &typeModel.Key
+				fieldModel.TypeKey = &tm.Key
+			}
 		}
 	}
+
+	return typeModel
+}
+
+// getTypeNameAndKey returns the display name of a Schema type.
+func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (string, *string) {
+	// Recurse if type is array
+	if s.Type == "array" {
+		typ, key := getTypeNameAndKey(fieldName, *s.Items.Schema)
+		return fmt.Sprintf("[]%s", typ), key
+	}
+
+	// Recurse if type is map
+	if s.Type == "object" && s.AdditionalProperties != nil {
+		typ, key := getTypeNameAndKey(fieldName, *s.AdditionalProperties.Schema)
+		return fmt.Sprintf("map[string]%s", typ), key
+	}
+
+	// Handle complex types
+	if s.Type == "object" && s.Properties != nil {
+		// TODO(roee88): we don't have type information so we need a reasonable workaround here
+		// key := fmt.Sprintf("%sSpec", strcase.UpperCamelCase(fieldName))
+		// if fieldName == "spec" {
+		// key = strcase.UpperCamelCase(fieldName)
+		// }
+		key := "object"
+		return key, &key
+	}
+
+	// Get the value for primitive types
+	value := s.Type
+	if s.Format != "" && value == "byte" {
+		value = "[]byte"
+	}
+
+	return value, nil
 }

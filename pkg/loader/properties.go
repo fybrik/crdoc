@@ -1,10 +1,8 @@
 package loader
 
 import (
-	"fmt"
 	"sort"
 
-	"github.com/stoewer/go-strcase"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
 
@@ -47,37 +45,4 @@ func isRequired(k string, required []string) bool {
 		}
 	}
 	return false
-}
-
-// getTypeNameAndKey returns the display name of a Schema type.
-func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (string, *string) {
-	// Recurse if type is array
-	if s.Type == "array" {
-		typ, key := getTypeNameAndKey(fieldName, *s.Items.Schema)
-		return fmt.Sprintf("[]%s", typ), key
-	}
-
-	// Recurse if type is map
-	if s.Type == "object" && s.AdditionalProperties != nil {
-		typ, key := getTypeNameAndKey(fieldName, *s.AdditionalProperties.Schema)
-		return fmt.Sprintf("map[string]%s", typ), key
-	}
-
-	// Handle complex types
-	if s.Type == "object" && s.Properties != nil {
-		// TODO(roee88): we don't have type information so we need a reasonable workaround here
-		key := fmt.Sprintf("%sSpec", strcase.UpperCamelCase(fieldName))
-		if fieldName == "spec" {
-			key = strcase.UpperCamelCase(fieldName)
-		}
-		return key, &key
-	}
-
-	// Get the value for primitive types
-	value := s.Type
-	if s.Format != "" && value == "byte" {
-		value = "[]byte"
-	}
-
-	return value, nil
 }

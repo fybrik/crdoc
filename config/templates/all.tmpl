@@ -6,29 +6,29 @@ description: "{{.Metadata.Description}}"
 
 Packages:
 {{range .Groups}}
-- [{{.Metadata.Title}}](#{{.Group}}/{{.Version}})
+- [{{.Group}}/{{.Version}}](#{{.Group}}/{{.Version}})
 {{end}}{{/* range .Groups */}}
 
 {{range .Groups}}
 {{$group := .}}
 # {{.Group}}/{{.Version}}
 
-{{.Metadata.Description}}
-
 Resource Types:
 {{range .Kinds}}
-- [{{.Metadata.Title}}](#{{.Name}})
+- [{{.Name}}](#{{.Name | lower}})
 {{end}}{{/* range .Kinds */}}
 
 {{range .Kinds}}
 {{$kind := .}}
 ## {{.Name}}
 
-{{.Metadata.Description}}
+<sup><sup>[↑ Jump to parent](#{{$group.Group | lower}}/{{$group.Version | lower}} )</sup></sup>
 
 {{range .Types}}
 
-### {{.Name}}
+{{if not (eq .Name $kind.Name)}}### {{.Name}}{{end}}
+
+{{if .ParentKey}}<sup><sup>[↑ Jump to parent]({{.ParentKey}})</sup></sup>{{end}}
 
 {{.Description}}
 
@@ -56,8 +56,8 @@ Resource Types:
       <td>true</td>
       </tr>
       <tr>
-      <td><b>metadata</b></td>
-      <td><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">ObjectMeta</a></td>
+      <td><b><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">metadata</a></b></td>
+      <td>object</td>
       <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
       <td>true</td>
       </tr>
@@ -66,8 +66,8 @@ Resource Types:
       {{$special := list "apiVersion" "kind" "metadata"}}
       {{- if not (has .Name $special) -}}
       <tr>
-        <td><b>{{.Name}}</b></td>
-        <td>{{.Typename}}</td>
+        <td><b>{{if .TypeKey}}<a href="{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
+        <td>{{.Type}}</td>
         <td>{{.Description}}</td>
         <td>{{.Required}}</td>
       </tr>

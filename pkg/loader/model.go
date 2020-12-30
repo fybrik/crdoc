@@ -6,15 +6,15 @@ type Model struct {
 }
 
 type GroupModel struct {
-	Metadata PageMetadata `yaml:"metadata"`
-	Group    string       `yaml:"group"`
-	Version  string       `yaml:"version"`
-	Kinds    []*KindModel `yaml:"kinds"`
+	// Metadata PageMetadata `yaml:"metadata"`
+	Group   string       `yaml:"group"`
+	Version string       `yaml:"version"`
+	Kinds   []*KindModel `yaml:"kinds"`
 }
 
 type KindModel struct {
-	Metadata PageMetadata `yaml:"metadata"`
-	Name     string       `yaml:"name"`
+	// Metadata PageMetadata `yaml:"metadata"`
+	Name string `yaml:"name"`
 
 	Types []*TypeModel
 }
@@ -27,15 +27,16 @@ type PageMetadata struct {
 
 type TypeModel struct {
 	Name        string
+	Key         string
+	ParentKey   *string
 	Description string
-	Link        string
 	Fields      []*FieldModel
 }
 
 type FieldModel struct {
 	Name        string
-	Typename    string
-	Typekey     *string
+	Type        string
+	TypeKey     *string
 	Description string
 	Required    bool
 }

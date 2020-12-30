@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/stoewer/go-strcase"
@@ -19,7 +20,12 @@ func escapeName(parts ...string) string {
 
 // headingID returns the ID built by hugo for a given header
 func headingID(s string) string {
-	result := strings.ToLower(s)
-	result = strings.ReplaceAll(result, " ", "-")
+	result := s
+	result = strings.ToLower(s)
+	result = strings.TrimSpace(result)
+	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
+	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
+	result = regexp.MustCompile(`(\-+$)`).ReplaceAllString(result, "")
+
 	return result
 }
