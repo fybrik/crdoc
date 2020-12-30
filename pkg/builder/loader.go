@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
+// LoadModel loads a Model from a TOC yaml
 func LoadModel(filepath string) (*Model, error) {
 	model := &Model{}
 	if filepath != "" {
@@ -31,6 +32,7 @@ func LoadModel(filepath string) (*Model, error) {
 	return model, nil
 }
 
+// LoadCRDs loads all CustomResourceDefinition resources from a directory (glob)
 func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error) {
 	files, err := filepath.Glob(path.Join(dirpath, "*"))
 	if err != nil {
@@ -53,7 +55,7 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 		}
 
 		for _, document := range fileDocuments {
-			crd, err := DecodeCRD(document)
+			crd, err := decodeCRD(document)
 			if err != nil {
 				return nil, err
 			}
@@ -88,7 +90,7 @@ func loadYAMLDocuments(filecontent []byte) ([][]byte, error) {
 	return res, nil
 }
 
-func DecodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) {
+func decodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) {
 	sch := runtime.NewScheme()
 	_ = scheme.AddToScheme(sch)
 	_ = apiextensions.AddToScheme(sch)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -20,6 +22,7 @@ type ModelBuilder struct {
 	Links        map[string]int
 }
 
+// Write outputs markdown to the output direcory
 func (b *ModelBuilder) Write() error {
 	filename := path.Join(b.OutputDir, "out.md")
 	f, err := os.Create(filename)
@@ -32,14 +35,13 @@ func (b *ModelBuilder) Write() error {
 	return t.Execute(f, *b.Model)
 }
 
+// Add adds a CustomResourceDefinition to the model
 func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 	// Add chapter for each version
 	for _, version := range crd.Spec.Versions {
 		group := crd.Spec.Group
 		gv := fmt.Sprintf("%s/%s", group, version.Name)
 		kind := crd.Spec.Names.Kind
-
-		log.Info("processing ", gv, kind)
 
 		// Find matching group/version
 		groupModel := b.Model.findGroupModel(group, version.Name)
@@ -52,15 +54,8 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 				Group:   group,
 				Version: version.Name,
 			}
-			log.Info("adding group ", groupModel)
 			b.Model.Groups = append(b.Model.Groups, groupModel)
 		}
-		// if groupModel.Metadata.Title == "" {
-		// 	groupModel.Metadata.Title = gv
-		// }
-		// if groupModel.Metadata.Description == "" {
-		// 	groupModel.Metadata.Description = fmt.Sprintf("API Reference for %s", gv)
-		// }
 
 		// Find matching kind
 		kindModel := groupModel.findKindModel(kind)
@@ -72,15 +67,8 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 			kindModel = &KindModel{
 				Name: kind,
 			}
-			log.Info("adding kind ", kindModel)
 			groupModel.Kinds = append(groupModel.Kinds, kindModel)
 		}
-		// if kindModel.Metadata.Title == "" {
-		// 	kindModel.Metadata.Title = kind
-		// }
-		// if kindModel.Metadata.Description == "" {
-		// 	kindModel.Metadata.Description = fmt.Sprintf("API Reference for %s (%s)", kind, gv)
-		// }
 
 		// Find schema
 		validation := version.Schema
@@ -121,18 +109,15 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		Description: schema.Description,
 	}
 	kindModel.Types = append(kindModel.Types, typeModel)
-	// log.Info("adding type ", typeModel)
 
 	for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
-		// log.Info("adding field ", fieldName)
 		property := schema.Properties[fieldName]
 		typename, typekey := getTypeNameAndKey(fieldName, property)
 		fieldModel := &FieldModel{
-			Name: fieldName,
-			Type: typename,
-			// TypeKey:     typekey, // TODO: handle as link
+			Name:        fieldName,
+			Type:        typename,
 			Description: property.Description,
-			Required:    isRequired(fieldName, schema.Required),
+			Required:    isRequiredProperty(fieldName, schema.Required),
 		}
 		typeModel.Fields = append(typeModel.Fields, fieldModel)
 
@@ -174,11 +159,6 @@ func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (strin
 
 	// Handle complex types
 	if s.Type == "object" && s.Properties != nil {
-		// TODO(roee88): we don't have type information so we need a reasonable workaround here
-		// key := fmt.Sprintf("%sSpec", strcase.UpperCamelCase(fieldName))
-		// if fieldName == "spec" {
-		// key = strcase.UpperCamelCase(fieldName)
-		// }
 		key := "object"
 		return key, &key
 	}
@@ -190,4 +170,57 @@ func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (strin
 	}
 
 	return value, nil
+}
+
+// headingID returns the ID built by hugo for a given header
+func headingID(s string) string {
+	result := s
+	result = strings.ToLower(s)
+	result = strings.TrimSpace(result)
+	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
+	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
+	result = regexp.MustCompile(`(\-+$)`).ReplaceAllString(result, "")
+
+	return result
+}
+
+// orderedPropertyKeys returns the keys of m alphabetically ordered
+// keys in required will be placed first
+func orderedPropertyKeys(required []string, m map[string]apiextensions.JSONSchemaProps, isResource bool) []string {
+	sort.Strings(required)
+
+	if isResource {
+		mkeys := make(map[string]struct{})
+		for k := range m {
+			mkeys[k] = struct{}{}
+		}
+		for _, special := range []string{"metadata", "kind", "apiVersion"} {
+			if !isRequiredProperty(special, required) {
+				if _, ok := mkeys[special]; ok {
+					required = append([]string{special}, required...)
+				}
+			}
+		}
+	}
+
+	keys := make([]string, len(m)-len(required))
+	i := 0
+	for k := range m {
+		if !isRequiredProperty(k, required) {
+			keys[i] = k
+			i++
+		}
+	}
+	sort.Strings(keys)
+	return append(required, keys...)
+}
+
+// isRequired returns true if k is in the required array
+func isRequiredProperty(k string, required []string) bool {
+	for _, r := range required {
+		if r == k {
+			return true
+		}
+	}
+	return false
 }

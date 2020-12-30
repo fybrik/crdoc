@@ -11,7 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	github.com/stoewer/go-strcase v1.2.0
+	github.com/stretchr/testify v1.5.1 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/apiextensions-apiserver v0.17.3
 	k8s.io/apimachinery v0.17.3
