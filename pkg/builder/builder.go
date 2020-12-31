@@ -29,7 +29,12 @@ func (b *ModelBuilder) Write() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Errorf("Error closing file: %s\n", err)
+		}
+	}()
 
 	t := template.Must(template.New("all.tmpl").Funcs(sprig.TxtFuncMap()).ParseFiles(fmt.Sprintf("%s/all.tmpl", b.TemplatesDir)))
 	return t.Execute(f, *b.Model)

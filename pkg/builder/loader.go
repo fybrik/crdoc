@@ -17,10 +17,10 @@ import (
 )
 
 // LoadModel loads a Model from a TOC yaml
-func LoadModel(filepath string) (*Model, error) {
+func LoadModel(file string) (*Model, error) {
 	model := &Model{}
-	if filepath != "" {
-		filecontent, err := ioutil.ReadFile(filepath)
+	if file != "" {
+		filecontent, err := ioutil.ReadFile(filepath.Clean(file))
 		if err != nil {
 			return nil, err
 		}
@@ -41,9 +41,9 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 
 	resources := []*apiextensions.CustomResourceDefinition{}
 
-	for _, filepath := range files {
+	for _, file := range files {
 		// Read file
-		filecontent, err := ioutil.ReadFile(filepath)
+		filecontent, err := ioutil.ReadFile(filepath.Clean(file))
 		if err != nil {
 			return nil, err
 		}
