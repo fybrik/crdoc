@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -13,10 +12,10 @@ import (
 )
 
 const (
-	outputDirOption    = "output-dir"
-	configDirOption    = "config-dir"
-	resourcesDirOption = "resources-dir"
-	tocFileOption      = "toc-file"
+	outputOption    = "output"
+	templateOption  = "template"
+	resourcesOption = "resources"
+	tocOption       = "toc"
 )
 
 // RootCmd defines the root cli command
@@ -30,24 +29,24 @@ func RootCmd() *cobra.Command {
 			_ = viper.BindPFlags(cmd.Flags())
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			outputDir := viper.GetString(outputDirOption)
-			configDir := viper.GetString(configDirOption)
-			resourcesDir := viper.GetString(resourcesDirOption)
-			tocFile := viper.GetString(tocFileOption)
+			outputOptionValue := viper.GetString(outputOption)
+			templateOptionValue := viper.GetString(templateOption)
+			resourcesOptionValue := viper.GetString(resourcesOption)
+			tocOptionValue := viper.GetString(tocOption)
 
-			model, err := pkg.LoadModel(tocFile)
+			model, err := pkg.LoadModel(tocOptionValue)
 			if err != nil {
 				return err
 			}
 
 			builder := pkg.ModelBuilder{
-				Model:        model,
-				Strict:       tocFile != "",
-				TemplatesDir: path.Join(configDir, "templates"),
-				OutputDir:    outputDir,
+				Model:              model,
+				Strict:             tocOptionValue != "",
+				TemplatesDirOrFile: templateOptionValue,
+				OutputFilepath:     outputOptionValue,
 			}
 
-			crds, err := pkg.LoadCRDs(resourcesDir)
+			crds, err := pkg.LoadCRDs(resourcesOptionValue)
 			if err != nil {
 				return err
 			}
@@ -68,13 +67,13 @@ func RootCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP(outputDirOption, "o", "", "Output directory for markdown file (required)")
-	_ = cmd.MarkFlagRequired(outputDirOption)
-	cmd.Flags().StringP(configDirOption, "c", "", "Configuration directory (required)")
-	_ = cmd.MarkFlagRequired(configDirOption)
-	cmd.Flags().StringP(resourcesDirOption, "r", "", "Directory containing CustomResourceDefinition YAML files (required)")
-	_ = cmd.MarkFlagRequired(resourcesDirOption)
-	cmd.Flags().StringP(tocFileOption, "t", "", "Path to table of contents YAML file")
+	cmd.Flags().StringP(outputOption, "o", "", "Path to output markdown file (required)")
+	_ = cmd.MarkFlagRequired(outputOption)
+	cmd.Flags().StringP(templateOption, "t", "", "Path to template file or directory (required)")
+	_ = cmd.MarkFlagRequired(templateOption)
+	cmd.Flags().StringP(resourcesOption, "r", "", "Path to directory with CustomResourceDefinition YAML files (required)")
+	_ = cmd.MarkFlagRequired(resourcesOption)
+	cmd.Flags().StringP(tocOption, "c", "", "Path to table of contents YAML file")
 
 	cobra.OnInitialize(initConfig)
 

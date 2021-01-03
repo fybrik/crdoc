@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -15,17 +16,25 @@ import (
 )
 
 type ModelBuilder struct {
-	Model        *Model
-	Strict       bool
-	TemplatesDir string
-	OutputDir    string
-	Links        map[string]int
+	Model              *Model
+	Strict             bool
+	TemplatesDirOrFile string
+	OutputFilepath     string
+	Links              map[string]int
 }
 
 // Write outputs markdown to the output direcory
 func (b *ModelBuilder) Write() error {
-	filename := path.Join(b.OutputDir, "out.md")
-	f, err := os.Create(filename)
+	outputFilepath := filepath.Clean(b.OutputFilepath)
+
+	// create dirs if needed
+	err := os.MkdirAll(filepath.Dir(outputFilepath), 0666)
+	if err != nil {
+		return err
+	}
+
+	// create the file
+	f, err := os.Create(outputFilepath)
 	if err != nil {
 		return err
 	}
@@ -36,7 +45,19 @@ func (b *ModelBuilder) Write() error {
 		}
 	}()
 
-	t := template.Must(template.New("all.tmpl").Funcs(sprig.TxtFuncMap()).ParseFiles(fmt.Sprintf("%s/all.tmpl", b.TemplatesDir)))
+	// Load and process template
+	templatesFilepath := filepath.Clean(b.TemplatesDirOrFile)
+	info, err := os.Stat(templatesFilepath)
+	if err != nil {
+		return err
+	}
+
+	var t *template.Template
+	if info.IsDir() {
+		t = template.Must(template.New("main.tmpl").Funcs(sprig.TxtFuncMap()).ParseGlob(path.Join(templatesFilepath, "*")))
+	} else {
+		t = template.Must(template.New(filepath.Base(templatesFilepath)).Funcs(sprig.TxtFuncMap()).ParseFiles(b.TemplatesDirOrFile))
+	}
 	return t.Execute(f, *b.Model)
 }
 
