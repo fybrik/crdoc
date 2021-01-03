@@ -16,22 +16,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
-// LoadModel loads a Model from a TOC yaml
-func LoadModel(file string) (*Model, error) {
-	model := &Model{}
-	if file != "" {
-		filecontent, err := ioutil.ReadFile(filepath.Clean(file))
-		if err != nil {
-			return nil, err
-		}
-
-		if err := yaml.Unmarshal(filecontent, model); err != nil {
-			return nil, err
-		}
-	}
-	return model, nil
-}
-
 // LoadCRDs loads all CustomResourceDefinition resources from a directory (glob)
 func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error) {
 	files, err := filepath.Glob(path.Join(dirpath, "*"))
