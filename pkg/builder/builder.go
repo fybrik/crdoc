@@ -152,12 +152,17 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 				fieldTypeModel.ParentKey = &typeModel.Key
 			}
 
+			fieldDescription := property.Description
+			if fieldTypename == "enum" {
+				fieldDescription = fmt.Sprintf("%s %s", fieldDescription, property.Enum)
+			}
+
 			// Create field model
 			fieldModel := &FieldModel{
 				Name:        fieldName,
 				Type:        fieldTypename,
 				TypeKey:     fieldTypeKey,
-				Description: property.Description,
+				Description: fieldDescription,
 				Required:    isRequiredProperty(fieldName, schema.Required),
 			}
 			typeModel.Fields = append(typeModel.Fields, fieldModel)
@@ -190,6 +195,11 @@ func getTypeName(props *apiextensions.JSONSchemaProps) string {
 			return "[]object"
 		}
 		return "[]"
+	}
+
+	// enum
+	if props.Type == "string" && props.Enum != nil && len(props.Enum) > 0 {
+		return "enum"
 	}
 
 	// Get the value for primitive types

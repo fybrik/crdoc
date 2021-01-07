@@ -26,6 +26,12 @@ spec:
                     type: integer
                   text:
                     type: string
+                  area:
+                    type: string
+                    description: Area...
+                    enum:
+                      - East
+                      - West
                 type: object
               type: object
             type: array
