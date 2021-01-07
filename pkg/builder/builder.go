@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -102,10 +103,13 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 			// Fallback to resource level schema
 			validation = crd.Spec.Validation
 		}
+		if validation == nil {
+			return errors.New("missing validation field in input CRD")
+		}
 		schema := validation.OpenAPIV3Schema
 
 		// Recusively add type models
-		_ = b.addTypeModels(groupModel, kindModel, []string{}, kind, schema, true)
+		_, _ = b.addTypeModels(groupModel, kindModel, kind, schema, true)
 	}
 
 	return nil
@@ -125,77 +129,75 @@ func (b *ModelBuilder) createLink(name string) string {
 	return link
 }
 
-func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel,
-	prefix []string, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) *TypeModel {
-
-	fullName := strings.Join(append(prefix, name), ".")
-	typeModel := &TypeModel{
-		Name:        fullName,
-		Key:         b.createLink(fullName),
-		Description: schema.Description,
-	}
-	kindModel.Types = append(kindModel.Types, typeModel)
-
-	for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
-		property := schema.Properties[fieldName]
-		typename, typekey := getTypeNameAndKey(fieldName, property)
-		fieldModel := &FieldModel{
-			Name:        fieldName,
-			Type:        typename,
-			Description: property.Description,
-			Required:    isRequiredProperty(fieldName, schema.Required),
+func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
+	typeName := getTypeName(schema)
+	if typeName == "object" && schema.Properties != nil {
+		// Create an object type model
+		typeModel := &TypeModel{
+			Name:        name,
+			Key:         b.createLink(name),
+			Description: schema.Description,
 		}
-		typeModel.Fields = append(typeModel.Fields, fieldModel)
+		kindModel.Types = append(kindModel.Types, typeModel)
 
-		if typekey != nil {
-			var tm *TypeModel = nil
-			if property.Type == "array" {
-				tm = b.addTypeModels(groupModel, kindModel,
-					append(prefix, name), fmt.Sprintf("%s[index]", fieldName), property.Items.Schema, false)
-			} else if property.Type == "object" && property.AdditionalProperties != nil {
-				tm = b.addTypeModels(groupModel, kindModel,
-					append(prefix, name), fmt.Sprintf("%s[key]", fieldName), property.AdditionalProperties.Schema, false)
-			} else if property.Type == "object" && property.Properties != nil {
-				tm = b.addTypeModels(groupModel, kindModel,
-					append(prefix, name), fieldName, &property, false)
+		// For each field
+		for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
+			property := schema.Properties[fieldName]
+
+			fieldFullname := strings.Join([]string{name, fieldName}, ".")
+			fieldTypename, fieldTypeModel := b.addTypeModels(groupModel, kindModel, fieldFullname, &property, false)
+			var fieldTypeKey *string = nil
+			if fieldTypeModel != nil {
+				fieldTypeKey = &fieldTypeModel.Key
+				fieldTypeModel.ParentKey = &typeModel.Key
 			}
-			if tm != nil {
-				tm.ParentKey = &typeModel.Key
-				fieldModel.TypeKey = &tm.Key
+
+			// Create field model
+			fieldModel := &FieldModel{
+				Name:        fieldName,
+				Type:        fieldTypename,
+				TypeKey:     fieldTypeKey,
+				Description: property.Description,
+				Required:    isRequiredProperty(fieldName, schema.Required),
 			}
+			typeModel.Fields = append(typeModel.Fields, fieldModel)
 		}
+		return typeName, typeModel
+	} else if typeName == "[]" {
+		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
+			fmt.Sprintf("%s[index]", name), schema.Items.Schema, false)
+		return "[]" + childTypeName, childTypeModel
+	} else if typeName == "map[string]" {
+		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
+			fmt.Sprintf("%s[key]", name), schema.AdditionalProperties.Schema, false)
+		return "map[string]" + childTypeName, childTypeModel
 	}
-
-	return typeModel
+	return typeName, nil
 }
 
-// getTypeNameAndKey returns the display name of a Schema type.
-func getTypeNameAndKey(fieldName string, s apiextensions.JSONSchemaProps) (string, *string) {
-	// Recurse if type is array
-	if s.Type == "array" {
-		typ, key := getTypeNameAndKey(fieldName, *s.Items.Schema)
-		return fmt.Sprintf("[]%s", typ), key
+func getTypeName(props *apiextensions.JSONSchemaProps) string {
+	// map
+	if props.Type == "object" && props.AdditionalProperties != nil {
+		if props.AdditionalProperties.Schema == nil && props.AdditionalItems.Allows {
+			return "map[string]string"
+		}
+		return "map[string]"
 	}
 
-	// Recurse if type is map
-	if s.Type == "object" && s.AdditionalProperties != nil {
-		typ, key := getTypeNameAndKey(fieldName, *s.AdditionalProperties.Schema)
-		return fmt.Sprintf("map[string]%s", typ), key
-	}
-
-	// Handle complex types
-	if s.Type == "object" && s.Properties != nil {
-		key := "object"
-		return key, &key
+	// array
+	if props.Type == "array" {
+		if props.Items == nil {
+			return "[]object"
+		}
+		return "[]"
 	}
 
 	// Get the value for primitive types
-	value := s.Type
-	if s.Format != "" && value == "byte" {
-		value = "[]byte"
+	if props.Format != "" && props.Type == "byte" {
+		return "[]byte"
 	}
 
-	return value, nil
+	return props.Type
 }
 
 // headingID returns the ID built by hugo for a given header
