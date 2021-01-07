@@ -142,7 +142,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 
 		// For each field
 		for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
-			property := schema.Properties[fieldName]
+			property := getEnrichedProperty(schema, fieldName)
 
 			fieldFullname := strings.Join([]string{name, fieldName}, ".")
 			fieldTypename, fieldTypeModel := b.addTypeModels(groupModel, kindModel, fieldFullname, &property, false)
@@ -181,6 +181,26 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 }
 
 func getTypeName(props *apiextensions.JSONSchemaProps) string {
+	if props.XIntOrString {
+		return "int or string"
+	}
+
+	if props.XEmbeddedResource {
+		return "RawExtension"
+	}
+
+	if props.Type == "" && props.XPreserveUnknownFields != nil {
+		return "JSON"
+	}
+
+	if props.Type == "string" && props.Enum != nil && len(props.Enum) > 0 {
+		return "enum"
+	}
+
+	if props.Format != "" && props.Type == "byte" {
+		return "[]byte"
+	}
+
 	// map
 	if props.Type == "object" && props.AdditionalProperties != nil {
 		if props.AdditionalProperties.Schema == nil && props.AdditionalItems.Allows {
@@ -195,16 +215,6 @@ func getTypeName(props *apiextensions.JSONSchemaProps) string {
 			return "[]object"
 		}
 		return "[]"
-	}
-
-	// enum
-	if props.Type == "string" && props.Enum != nil && len(props.Enum) > 0 {
-		return "enum"
-	}
-
-	// Get the value for primitive types
-	if props.Format != "" && props.Type == "byte" {
-		return "[]byte"
 	}
 
 	return props.Type
@@ -260,4 +270,80 @@ func isRequiredProperty(k string, required []string) bool {
 		}
 	}
 	return false
+}
+
+func getEnrichedProperty(schema *apiextensions.JSONSchemaProps, fieldName string) apiextensions.JSONSchemaProps {
+	property := schema.Properties[fieldName]
+
+	// Special case support for single allOf, anyOf, oneOf
+	// TODO: consider adding support for not and for length greater than 1
+	var validationProperty *apiextensions.JSONSchemaProps
+	if len(schema.AllOf) == 1 {
+		validationProperty = getProperty(&schema.AllOf[0], fieldName)
+	} else if len(schema.AnyOf) == 1 {
+		validationProperty = getProperty(&schema.AnyOf[0], fieldName)
+	} else if len(schema.OneOf) == 1 {
+		validationProperty = getProperty(&schema.OneOf[0], fieldName)
+	}
+
+	if validationProperty != nil {
+		// does not set description, type, default, additionalProperties, nullable within an allOf, anyOf, oneOf or not
+		// with the exception of the two pattern for x-kubernetes-int-or-string: true (see below).
+		if property.Format == "" {
+			property.Format = validationProperty.Format
+		}
+		if property.Title == "" {
+			property.Title = validationProperty.Title
+		}
+		if property.Maximum == nil {
+			property.Maximum = validationProperty.Maximum
+			property.ExclusiveMaximum = validationProperty.ExclusiveMaximum
+		}
+		if property.Minimum == nil {
+			property.Minimum = validationProperty.Minimum
+			property.ExclusiveMinimum = validationProperty.ExclusiveMinimum
+		}
+		if property.MaxLength == nil {
+			property.MaxLength = validationProperty.MaxLength
+		}
+		if property.MinLength == nil {
+			property.MinLength = validationProperty.MinLength
+		}
+		if property.Pattern == "" {
+			property.Pattern = validationProperty.Pattern
+		}
+		if property.MaxItems == nil {
+			property.MaxItems = validationProperty.MaxItems
+		}
+		if property.MinItems == nil {
+			property.MinItems = validationProperty.MinItems
+		}
+		if property.MultipleOf == nil {
+			property.MultipleOf = validationProperty.MultipleOf
+		}
+		if property.Enum == nil {
+			property.Enum = validationProperty.Enum
+		}
+		if property.MaxProperties == nil {
+			property.MaxProperties = validationProperty.MaxProperties
+		}
+		if property.MinProperties == nil {
+			property.MinProperties = validationProperty.MinProperties
+		}
+		if property.Required == nil {
+			property.Required = validationProperty.Required
+		}
+	}
+
+	return property
+}
+
+func getProperty(schema *apiextensions.JSONSchemaProps, fieldName string) *apiextensions.JSONSchemaProps {
+	if schema != nil {
+		property, exists := schema.Properties[fieldName]
+		if exists {
+			return &property
+		}
+	}
+	return nil
 }
