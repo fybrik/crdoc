@@ -1,0 +1,9 @@
+metadata:
+  title: "API Reference"
+  weight: 1
+  description: "API Reference example"
+groups:
+  - group: project.io
+    version: v1alpha1
+    kinds:
+      - name: Example
