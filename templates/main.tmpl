@@ -23,14 +23,15 @@ Resource Types:
 {{range .Kinds}}
 {{$kind := .}}
 ## {{.Name}}
-
-<sup><sup>[↑ Jump to parent](#{{$group.Group | lower}}/{{$group.Version | lower}} )</sup></sup>
+<sup><sup>[↩ Parent](#{{$group.Group | lower}}/{{$group.Version | lower}} )</sup></sup>
 
 {{range .Types}}
 
-{{if not (eq .Name $kind.Name)}}### {{.Name}}{{end}}
+{{if not (eq .Name $kind.Name)}}
+### {{.Name}}
+{{if .ParentKey}}<sup><sup>[↩ Parent]({{.ParentKey}})</sup></sup>{{end}}
+{{end}}
 
-{{if .ParentKey}}<sup><sup>[↑ Jump to parent]({{.ParentKey}})</sup></sup>{{end}}
 
 {{.Description}}
 
