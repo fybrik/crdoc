@@ -7,7 +7,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -22,44 +21,6 @@ type ModelBuilder struct {
 	TemplatesDirOrFile string
 	OutputFilepath     string
 	Links              map[string]int
-}
-
-// Write outputs markdown to the output direcory
-func (b *ModelBuilder) Write() error {
-	outputFilepath := filepath.Clean(b.OutputFilepath)
-
-	// create dirs if needed
-	err := os.MkdirAll(filepath.Dir(outputFilepath), os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	// create the file
-	f, err := os.Create(outputFilepath)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if err := f.Close(); err != nil {
-			log.Errorf("Error closing file: %s\n", err)
-		}
-	}()
-
-	// Load and process template
-	templatesFilepath := filepath.Clean(b.TemplatesDirOrFile)
-	info, err := os.Stat(templatesFilepath)
-	if err != nil {
-		return err
-	}
-
-	var t *template.Template
-	if info.IsDir() {
-		t = template.Must(template.New("main.tmpl").Funcs(sprig.TxtFuncMap()).ParseGlob(path.Join(templatesFilepath, "*")))
-	} else {
-		t = template.Must(template.New(filepath.Base(templatesFilepath)).Funcs(sprig.TxtFuncMap()).ParseFiles(b.TemplatesDirOrFile))
-	}
-	return t.Execute(f, *b.Model)
 }
 
 // Add adds a CustomResourceDefinition to the model
@@ -115,18 +76,42 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 	return nil
 }
 
-func (b *ModelBuilder) createLink(name string) string {
-	link := fmt.Sprintf("#%s", headingID(name))
-	if b.Links == nil {
-		b.Links = make(map[string]int)
+// Write outputs markdown to the output direcory
+func (b *ModelBuilder) Output() error {
+	outputFilepath := filepath.Clean(b.OutputFilepath)
+
+	// create dirs if needed
+	err := os.MkdirAll(filepath.Dir(outputFilepath), os.ModePerm)
+	if err != nil {
+		return err
 	}
-	if value, exists := b.Links[link]; exists {
-		value += 1
-		link = fmt.Sprintf("%s-%d", link, value)
+
+	// create the file
+	f, err := os.Create(outputFilepath)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Errorf("Error closing file: %s\n", err)
+		}
+	}()
+
+	// Load and process template
+	templatesFilepath := filepath.Clean(b.TemplatesDirOrFile)
+	info, err := os.Stat(templatesFilepath)
+	if err != nil {
+		return err
+	}
+
+	var t *template.Template
+	if info.IsDir() {
+		t = template.Must(template.New("main.tmpl").Funcs(sprig.TxtFuncMap()).ParseGlob(path.Join(templatesFilepath, "*")))
 	} else {
-		b.Links[link] = 0
+		t = template.Must(template.New(filepath.Base(templatesFilepath)).Funcs(sprig.TxtFuncMap()).ParseFiles(b.TemplatesDirOrFile))
 	}
-	return link
+	return t.Execute(f, *b.Model)
 }
 
 func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
@@ -137,6 +122,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			Name:        name,
 			Key:         b.createLink(name),
 			Description: schema.Description,
+			IsTopLevel:  isTopLevel,
 		}
 		kindModel.Types = append(kindModel.Types, typeModel)
 
@@ -163,7 +149,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 				Type:        fieldTypename,
 				TypeKey:     fieldTypeKey,
 				Description: fieldDescription,
-				Required:    isRequiredProperty(fieldName, schema.Required),
+				Required:    containsString(fieldName, schema.Required),
 			}
 			typeModel.Fields = append(typeModel.Fields, fieldModel)
 		}
@@ -178,6 +164,31 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		return "map[string]" + childTypeName, childTypeModel
 	}
 	return typeName, nil
+}
+
+func (b *ModelBuilder) createLink(name string) string {
+	link := fmt.Sprintf("#%s", headingID(name))
+	if b.Links == nil {
+		b.Links = make(map[string]int)
+	}
+	if value, exists := b.Links[link]; exists {
+		value += 1
+		link = fmt.Sprintf("%s-%d", link, value)
+	} else {
+		b.Links[link] = 0
+	}
+	return link
+}
+
+// headingID returns the ID built by hugo/github for a given header
+func headingID(s string) string {
+	result := strings.ToLower(s)
+	result = strings.TrimSpace(result)
+	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
+	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
+	result = regexp.MustCompile(`(\-+$)`).ReplaceAllString(result, "")
+
+	return result
 }
 
 func getTypeName(props *apiextensions.JSONSchemaProps) string {
@@ -218,132 +229,4 @@ func getTypeName(props *apiextensions.JSONSchemaProps) string {
 	}
 
 	return props.Type
-}
-
-// headingID returns the ID built by hugo for a given header
-func headingID(s string) string {
-	result := strings.ToLower(s)
-	result = strings.TrimSpace(result)
-	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
-	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
-	result = regexp.MustCompile(`(\-+$)`).ReplaceAllString(result, "")
-
-	return result
-}
-
-// orderedPropertyKeys returns the keys of m alphabetically ordered
-// keys in required will be placed first
-func orderedPropertyKeys(required []string, m map[string]apiextensions.JSONSchemaProps, isResource bool) []string {
-	sort.Strings(required)
-
-	if isResource {
-		mkeys := make(map[string]struct{})
-		for k := range m {
-			mkeys[k] = struct{}{}
-		}
-		for _, special := range []string{"metadata", "kind", "apiVersion"} {
-			if !isRequiredProperty(special, required) {
-				if _, ok := mkeys[special]; ok {
-					required = append([]string{special}, required...)
-				}
-			}
-		}
-	}
-
-	keys := make([]string, len(m)-len(required))
-	i := 0
-	for k := range m {
-		if !isRequiredProperty(k, required) {
-			keys[i] = k
-			i++
-		}
-	}
-	sort.Strings(keys)
-	return append(required, keys...)
-}
-
-// isRequired returns true if k is in the required array
-func isRequiredProperty(k string, required []string) bool {
-	for _, r := range required {
-		if r == k {
-			return true
-		}
-	}
-	return false
-}
-
-func getEnrichedProperty(schema *apiextensions.JSONSchemaProps, fieldName string) apiextensions.JSONSchemaProps {
-	property := schema.Properties[fieldName]
-
-	// Special case support for single allOf, anyOf, oneOf
-	// TODO: consider adding support for not and for length greater than 1
-	var validationProperty *apiextensions.JSONSchemaProps
-	if len(schema.AllOf) == 1 {
-		validationProperty = getProperty(&schema.AllOf[0], fieldName)
-	} else if len(schema.AnyOf) == 1 {
-		validationProperty = getProperty(&schema.AnyOf[0], fieldName)
-	} else if len(schema.OneOf) == 1 {
-		validationProperty = getProperty(&schema.OneOf[0], fieldName)
-	}
-
-	if validationProperty != nil {
-		// does not set description, type, default, additionalProperties, nullable within an allOf, anyOf, oneOf or not
-		// with the exception of the two pattern for x-kubernetes-int-or-string: true (see below).
-		if property.Format == "" {
-			property.Format = validationProperty.Format
-		}
-		if property.Title == "" {
-			property.Title = validationProperty.Title
-		}
-		if property.Maximum == nil {
-			property.Maximum = validationProperty.Maximum
-			property.ExclusiveMaximum = validationProperty.ExclusiveMaximum
-		}
-		if property.Minimum == nil {
-			property.Minimum = validationProperty.Minimum
-			property.ExclusiveMinimum = validationProperty.ExclusiveMinimum
-		}
-		if property.MaxLength == nil {
-			property.MaxLength = validationProperty.MaxLength
-		}
-		if property.MinLength == nil {
-			property.MinLength = validationProperty.MinLength
-		}
-		if property.Pattern == "" {
-			property.Pattern = validationProperty.Pattern
-		}
-		if property.MaxItems == nil {
-			property.MaxItems = validationProperty.MaxItems
-		}
-		if property.MinItems == nil {
-			property.MinItems = validationProperty.MinItems
-		}
-		if property.MultipleOf == nil {
-			property.MultipleOf = validationProperty.MultipleOf
-		}
-		if property.Enum == nil {
-			property.Enum = validationProperty.Enum
-		}
-		if property.MaxProperties == nil {
-			property.MaxProperties = validationProperty.MaxProperties
-		}
-		if property.MinProperties == nil {
-			property.MinProperties = validationProperty.MinProperties
-		}
-		if property.Required == nil {
-			property.Required = validationProperty.Required
-		}
-	}
-
-	return property
-}
-
-func getProperty(schema *apiextensions.JSONSchemaProps, fieldName string) *apiextensions.JSONSchemaProps {
-	if schema != nil {
-		property, exists := schema.Properties[fieldName]
-		if exists {
-			return &property
-		}
-	}
-	return nil
 }

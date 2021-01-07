@@ -58,7 +58,7 @@ func RootCmd() *cobra.Command {
 				}
 			}
 
-			err = builder.Write()
+			err = builder.Output()
 			if err != nil {
 				return err
 			}

@@ -27,7 +27,7 @@ Resource Types:
 
 {{range .Types}}
 
-{{if not (eq .Name $kind.Name)}}
+{{if not .IsTopLevel}}
 ### {{.Name}}
 {{if .ParentKey}}<sup><sup>[↩ Parent]({{.ParentKey}})</sup></sup>{{end}}
 {{end}}
@@ -45,7 +45,7 @@ Resource Types:
         </tr>
     </thead>
     <tbody>
-      {{- if eq .Name $kind.Name -}}
+      {{- if .IsTopLevel -}}
       <tr>
       <td><b>apiVersion</b></td>
       <td>string</td>
@@ -66,15 +66,12 @@ Resource Types:
       </tr>
       {{- end -}}
       {{- range .Fields -}}
-      {{$special := list "apiVersion" "kind" "metadata"}}
-      {{- if not (has .Name $special) -}}
       <tr>
         <td><b>{{if .TypeKey}}<a href="{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
         <td>{{.Type}}</td>
         <td>{{.Description}}</td>
         <td>{{.Required}}</td>
       </tr>
-      {{- end -}}
       {{- end -}}
     </tbody>
 </table>

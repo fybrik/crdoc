@@ -30,6 +30,7 @@ type TypeModel struct {
 	Key         string
 	ParentKey   *string
 	Description string
+	IsTopLevel  bool
 	Fields      []*FieldModel
 }
 
