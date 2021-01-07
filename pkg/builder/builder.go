@@ -29,7 +29,7 @@ func (b *ModelBuilder) Write() error {
 	outputFilepath := filepath.Clean(b.OutputFilepath)
 
 	// create dirs if needed
-	err := os.MkdirAll(filepath.Dir(outputFilepath), 0666)
+	err := os.MkdirAll(filepath.Dir(outputFilepath), os.ModePerm)
 	if err != nil {
 		return err
 	}

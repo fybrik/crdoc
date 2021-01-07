@@ -11,5 +11,5 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Generated e.g. by LineCount
+# Generated e.g. by LineCount and the example usage command
 out/

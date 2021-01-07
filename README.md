@@ -29,7 +29,7 @@ Flags:
 For example:
 
 ```bash
-crdoc --template templates --resources example/crds --output example/output.md
+crdoc --template templates --resources example/crds --output out/output.md
 ```
 
 ## Limitations
