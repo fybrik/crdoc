@@ -141,7 +141,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		kindModel.Types = append(kindModel.Types, typeModel)
 
 		// For each field
-		for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, true) {
+		for _, fieldName := range orderedPropertyKeys(schema.Required, schema.Properties, isTopLevel) {
 			property := getEnrichedProperty(schema, fieldName)
 
 			fieldFullname := strings.Join([]string{name, fieldName}, ".")
