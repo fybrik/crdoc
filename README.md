@@ -34,5 +34,12 @@ crdoc --template templates --resources example/crds --output out/output.md
 
 ## Limitations
 
-- There are no custom type information because this information is not available in the YAMLs.
-- Supported apiVersions are `apiextensions.k8s.io/v1` and `apiextensions.k8s.io/v1beta1`.
+- There are no custom type information because this information is not available in the YAMLs. This tool was specifically designed with that in mind and provides a different reader experience compared to other similar tools.
+- `apiextensions.k8s.io/v1beta1` is supported but we assume a structural schema as required by v1.
+
+## Similar tools
+
+- [gen-resourcesdocs](https://github.com/kubernetes-sigs/reference-docs/tree/master/gen-resourcesdocs)
+- [gen-crd-api-reference-docs](https://github.com/ahmetb/gen-crd-api-reference-docs)
+- [crd-ref-docs](https://github.com/elastic/crd-ref-docs)
+
