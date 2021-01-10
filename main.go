@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	pkg "github.com/roee88/crdoc/pkg/builder"
+	pkg "github.com/mesh-for-data/crdoc/pkg/builder"
 )
 
 const (

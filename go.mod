@@ -1,4 +1,4 @@
-module github.com/roee88/crdoc
+module github.com/mesh-for-data/crdoc
 
 go 1.13
 

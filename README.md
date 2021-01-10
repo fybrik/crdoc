@@ -5,7 +5,7 @@ crdoc is a CLI to generate markdown documentation from Kubernetes `CustomResourc
 ## Install
 
 ```bash
-go get github.com/roee88/crdoc
+go get github.com/mesh-for-data/crdoc
 ```
 
 This will put crdoc in `$(go env GOPATH)/bin`. You may need to add that directory to your `$PATH` if you encounter a "command not found" error.
