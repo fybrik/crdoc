@@ -1,14 +1,25 @@
 # crdoc
 
-crdoc is a CLI to generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML files.
+Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML files.
 
 ## Install
+
+Use one of the following methods to install `crdoc`.
+
+### Binary (Cross-platform) 
+
+Download the appropriate version for your platform from [Releases](https://github.com/mesh-for-data/crdoc/releases/latest).
+You may want to install it somewhere in your system's PATH such as `/usr/local/bin`.
+
+### Using go get
+
+If you have go 1.13 or later then you can run:
 
 ```bash
 go get github.com/mesh-for-data/crdoc
 ```
 
-This will put crdoc in `$(go env GOPATH)/bin`. You may need to add that directory to your `$PATH` if you encounter a "command not found" error.
+This will put `crdoc` in `$(go env GOPATH)/bin`. You may need to add that directory to your system's PATH if you encounter a "command not found" error.
 
 ## Usage
 
