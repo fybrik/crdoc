@@ -11,7 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apiextensions-apiserver v0.17.3
 	k8s.io/apimachinery v0.20.2
 	k8s.io/client-go v0.17.3
