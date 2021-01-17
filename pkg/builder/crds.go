@@ -94,6 +94,10 @@ func decodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) 
 		if strings.HasPrefix(err.Error(), "Object 'Kind' is missing in ") {
 			return nil, nil
 		}
+		// Not a kind from the above registered schemas
+		if strings.HasPrefix(err.Error(), "no kind ") {
+			return nil, nil
+		}
 		return nil, err
 	}
 
