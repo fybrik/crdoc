@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
@@ -89,6 +90,10 @@ func decodeCRD(content []byte) (*apiextensions.CustomResourceDefinition, error) 
 	decode := serializer.NewCodecFactory(sch).UniversalDeserializer().Decode
 	obj, _, err := decode(content, nil, nil)
 	if err != nil {
+		// Not a Kubernetes resource
+		if strings.HasPrefix(err.Error(), "Object 'Kind' is missing in ") {
+			return nil, nil
+		}
 		return nil, err
 	}
 
