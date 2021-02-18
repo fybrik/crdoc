@@ -6,24 +6,28 @@ package builder
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
 
+const embedPrefix = "embed:"
+
+// ModelBuilder is the entry point for docs generation
 type ModelBuilder struct {
 	Model              *Model
 	Strict             bool
 	TemplatesDirOrFile string
 	OutputFilepath     string
 	Links              map[string]int
+	BuiltinTemplates   fs.FS
 }
 
 // Add adds a CustomResourceDefinition to the model
@@ -79,7 +83,7 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 	return nil
 }
 
-// Write outputs markdown to the output direcory
+// Output writes markdown to the output direcory
 func (b *ModelBuilder) Output() error {
 	outputFilepath := filepath.Clean(b.OutputFilepath)
 
@@ -101,20 +105,18 @@ func (b *ModelBuilder) Output() error {
 		}
 	}()
 
-	// Load and process template
-	templatesFilepath := filepath.Clean(b.TemplatesDirOrFile)
-	info, err := os.Stat(templatesFilepath)
-	if err != nil {
-		return err
+	// Values for embedded templates
+	templatesFs := b.BuiltinTemplates
+	pattern := "templates/**.tmpl"
+
+	dir, file := filepath.Split(b.TemplatesDirOrFile)
+	if dir != "" {
+		// Override to take extenal template
+		templatesFs = os.DirFS(dir)
+		pattern = "**.tmpl"
 	}
 
-	var t *template.Template
-	if info.IsDir() {
-		t = template.Must(template.New("main.tmpl").Funcs(sprig.TxtFuncMap()).ParseGlob(path.Join(templatesFilepath, "*")))
-	} else {
-		t = template.Must(template.New(filepath.Base(templatesFilepath)).Funcs(sprig.TxtFuncMap()).ParseFiles(b.TemplatesDirOrFile))
-	}
-	return t.Execute(f, *b.Model)
+	return template.Must(template.New(file).Funcs(sprig.TxtFuncMap()).ParseFS(templatesFs, pattern)).Execute(f, *b.Model)
 }
 
 func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
@@ -175,7 +177,7 @@ func (b *ModelBuilder) createLink(name string) string {
 		b.Links = make(map[string]int)
 	}
 	if value, exists := b.Links[link]; exists {
-		value += 1
+		value++
 		link = fmt.Sprintf("%s-%d", link, value)
 	} else {
 		b.Links[link] = 0

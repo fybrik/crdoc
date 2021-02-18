@@ -4,6 +4,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"strings"
@@ -21,11 +22,25 @@ const (
 	tocOption       = "toc"
 )
 
+//go:embed templates/*
+var builtinTemplates embed.FS
+
 // RootCmd defines the root cli command
 func RootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "crdoc",
-		Short:         "Output markdown documentation from Kubernetes CustomResourceDefinition YAML files",
+		Use:   "crdoc",
+		Short: "Output markdown documentation from Kubernetes CustomResourceDefinition YAML files",
+		Example: `
+  # Generate example/output.md from example/crds using the default markdown.tmpl tempalte: 
+  crdoc --resources example/crds --output example/output.md
+
+  # Override template (builtin or custom):
+  crdoc --resources example/crds --output example/output.md --template frontmatter.tmpl
+  crdoc --resources example/crds --output example/output.md --template templates_folder/file.tmpl
+
+  # Use a Table of Contents to filter and order CRDs
+  crdoc --resources example/crds --output example/output.md --toc example/toc.yaml
+`,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		PreRun: func(cmd *cobra.Command, args []string) {
@@ -47,6 +62,7 @@ func RootCmd() *cobra.Command {
 				Strict:             tocOptionValue != "",
 				TemplatesDirOrFile: templateOptionValue,
 				OutputFilepath:     outputOptionValue,
+				BuiltinTemplates:   builtinTemplates,
 			}
 
 			crds, err := pkg.LoadCRDs(resourcesOptionValue)
@@ -72,10 +88,9 @@ func RootCmd() *cobra.Command {
 
 	cmd.Flags().StringP(outputOption, "o", "", "Path to output markdown file (required)")
 	_ = cmd.MarkFlagRequired(outputOption)
-	cmd.Flags().StringP(templateOption, "t", "", "Path to template file or directory (required)")
-	_ = cmd.MarkFlagRequired(templateOption)
 	cmd.Flags().StringP(resourcesOption, "r", "", "Path to directory with CustomResourceDefinition YAML files (required)")
 	_ = cmd.MarkFlagRequired(resourcesOption)
+	cmd.Flags().StringP(templateOption, "t", "markdown.tmpl", "Path to file in a templates directory")
 	cmd.Flags().StringP(tocOption, "c", "", "Path to table of contents YAML file")
 
 	cobra.OnInitialize(initConfig)
