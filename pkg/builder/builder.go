@@ -18,8 +18,6 @@ import (
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
 
-const embedPrefix = "embed:"
-
 // ModelBuilder is the entry point for docs generation
 type ModelBuilder struct {
 	Model              *Model
