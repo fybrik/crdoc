@@ -4,32 +4,43 @@ Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML 
 
 ## Install
 
-Download the appropriate version for your platform from [Releases](https://github.com/mesh-for-data/crdoc/releases/latest). You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
+Download the appropriate version for your platform from [Releases](https://github.com/mesh-for-data/crdoc/releases/latest).
+You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
 
-Alternatively, if you have go 1.13 or later then you can also use `go get`. This will put `crdoc` in `$(go env GOPATH)/bin`:
+Alternatively, if you have go 1.16 or later then you can also use `go install`. 
+This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 
 ```bash
-go get github.com/mesh-for-data/crdoc
+go install github.com/mesh-for-data/crdoc@latest
 ```
 
 ## Usage
 
-```
+```bash
+Output markdown documentation from Kubernetes CustomResourceDefinition YAML files
+
 Usage:
   crdoc [flags]
+
+Examples:
+
+  # Generate example/output.md from example/crds using the default markdown.tmpl tempalte: 
+  crdoc --resources example/crds --output example/output.md
+
+  # Override template (builtin or custom):
+  crdoc --resources example/crds --output example/output.md --template frontmatter.tmpl
+  crdoc --resources example/crds --output example/output.md --template templates_folder/file.tmpl
+
+  # Use a Table of Contents to filter and order CRDs
+  crdoc --resources example/crds --output example/output.md --toc example/toc.yaml
+
 
 Flags:
   -h, --help               help for crdoc
   -o, --output string      Path to output markdown file (required)
   -r, --resources string   Path to directory with CustomResourceDefinition YAML files (required)
-  -t, --template string    Path to template file or directory (required)
+  -t, --template string    Path to file in a templates directory (default "markdown.tmpl")
   -c, --toc string         Path to table of contents YAML file
-```
-
-For example:
-
-```bash
-crdoc --template templates --resources example/crds --output out/output.md
 ```
 
 ## Limitations
