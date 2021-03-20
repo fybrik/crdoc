@@ -24,7 +24,7 @@ Usage:
 
 Examples:
 
-  # Generate example/output.md from example/crds using the default markdown.tmpl tempalte: 
+  # Generate example/output.md from example/crds using the default markdown.tmpl template: 
   crdoc --resources example/crds --output example/output.md
 
   # Override template (builtin or custom):
