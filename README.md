@@ -1,10 +1,10 @@
 # crdoc
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mesh-for-data/crdoc)](https://goreportcard.com/report/github.com/mesh-for-data/crdoc)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mesh-for-data/crdoc.svg)](https://pkg.go.dev/github.com/mesh-for-data/crdoc)
 [![golangci-lint](https://github.com/mesh-for-data/crdoc/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/golangci-lint.yml)
 [![CodeQL](https://github.com/mesh-for-data/crdoc/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/codeql-analysis.yml)
 [![gosec](https://github.com/mesh-for-data/crdoc/actions/workflows/golang-security.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/golang-security.yml)
-[![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/mesh-for-data/crdoc)
 
 Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML files.
 
