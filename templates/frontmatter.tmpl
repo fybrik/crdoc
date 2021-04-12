@@ -8,22 +8,23 @@ description: {{.Metadata.Description}}
 
 Packages:
 {{range .Groups}}
-- [{{.Group}}/{{.Version}}](#{{.Group}}/{{.Version}})
-{{end}}{{/* range .Groups */}}
+- [{{.Group}}/{{.Version}}](#{{ anchorize (printf "%s/%s" .Group .Version) }})
+{{- end -}}{{/* range .Groups */}}
 
-{{range .Groups}}
-{{$group := .}}
+{{- range .Groups }}
+{{- $group := . }}
+
 # {{.Group}}/{{.Version}}
 
 Resource Types:
 {{range .Kinds}}
-- [{{.Name}}](#{{.Name | lower}})
+- [{{.Name}}](#{{ anchorize .Name }})
 {{end}}{{/* range .Kinds */}}
 
 {{range .Kinds}}
 {{$kind := .}}
 ## {{.Name}}
-<sup><sup>[↩ Parent](#{{$group.Group | lower}}/{{$group.Version | lower}} )</sup></sup>
+<sup><sup>[↩ Parent](#{{ anchorize (printf "%s/%s" $group.Group $group.Version) }} )</sup></sup>
 
 {{range .Types}}
 

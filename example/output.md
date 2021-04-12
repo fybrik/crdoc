@@ -2,7 +2,7 @@
 
 Packages:
 
-- [project.io/v1alpha1](#project.io/v1alpha1)
+- [project.io/v1alpha1](#projectiov1alpha1)
 
 # project.io/v1alpha1
 
@@ -14,7 +14,7 @@ Resource Types:
 
 
 ## Example
-<sup><sup>[↩ Parent](#project.io/v1alpha1 )</sup></sup>
+<sup><sup>[↩ Parent](#projectiov1alpha1 )</sup></sup>
 
 
 
