@@ -1,0 +1,25 @@
+name: test
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - uses: actions/checkout@v2
+      - name: Run on example
+        run: |
+          go run main.go --resources example/crds --output example/output.md
+      - name: Check that there are no source code changes
+        run: |
+          go mod tidy
+          git checkout go.sum
+          git diff --exit-code
