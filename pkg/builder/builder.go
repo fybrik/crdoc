@@ -4,12 +4,12 @@
 package builder
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 
@@ -25,8 +25,22 @@ type ModelBuilder struct {
 	Strict             bool
 	TemplatesDirOrFile string
 	OutputFilepath     string
-	Links              map[string]int
-	BuiltinTemplates   fs.FS
+
+	keys             map[string]int
+	builtinTemplates fs.FS
+}
+
+func NewModelBuilder(model *Model, strict bool, templatesDirOrFile string, outputFilepath string, builtinTemplates embed.FS) *ModelBuilder {
+
+	builder := &ModelBuilder{
+		Model:              model,
+		Strict:             strict,
+		TemplatesDirOrFile: templatesDirOrFile,
+		OutputFilepath:     outputFilepath,
+		builtinTemplates:   builtinTemplates,
+	}
+	builder.keys = make(map[string]int)
+	return builder
 }
 
 // Add adds a CustomResourceDefinition to the model
@@ -105,7 +119,7 @@ func (b *ModelBuilder) Output() error {
 	}()
 
 	// Values for embedded templates
-	templatesFs := b.BuiltinTemplates
+	templatesFs := b.builtinTemplates
 	pattern := "templates/**.tmpl"
 
 	dir, file := filepath.Split(b.TemplatesDirOrFile)
@@ -128,7 +142,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		// Create an object type model
 		typeModel := &TypeModel{
 			Name:        name,
-			Key:         b.createLink(name),
+			Key:         b.createKey(name),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,
 		}
@@ -174,29 +188,15 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 	return typeName, nil
 }
 
-func (b *ModelBuilder) createLink(name string) string {
-	link := fmt.Sprintf("#%s", headingID(name))
-	if b.Links == nil {
-		b.Links = make(map[string]int)
-	}
-	if value, exists := b.Links[link]; exists {
+func (b *ModelBuilder) createKey(name string) string {
+	key := functions.Anchorize(name)
+	if value, exists := b.keys[key]; exists {
 		value++
-		link = fmt.Sprintf("%s-%d", link, value)
+		key = fmt.Sprintf("%s-%d", key, value)
 	} else {
-		b.Links[link] = 0
+		b.keys[key] = 0
 	}
-	return link
-}
-
-// headingID returns the ID built by hugo/github for a given header
-func headingID(s string) string {
-	result := strings.ToLower(s)
-	result = strings.TrimSpace(result)
-	result = regexp.MustCompile(`([^\w\- ]+)`).ReplaceAllString(result, "")
-	result = regexp.MustCompile(`(\s)`).ReplaceAllString(result, "-")
-	result = regexp.MustCompile(`(\-+$)`).ReplaceAllString(result, "")
-
-	return result
+	return key
 }
 
 func getTypeName(props *apiextensions.JSONSchemaProps) string {

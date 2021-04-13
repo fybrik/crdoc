@@ -57,13 +57,8 @@ func RootCmd() *cobra.Command {
 				return err
 			}
 
-			builder := pkg.ModelBuilder{
-				Model:              model,
-				Strict:             tocOptionValue != "",
-				TemplatesDirOrFile: templateOptionValue,
-				OutputFilepath:     outputOptionValue,
-				BuiltinTemplates:   builtinTemplates,
-			}
+			builder := pkg.NewModelBuilder(model, tocOptionValue != "",
+				templateOptionValue, outputOptionValue, builtinTemplates)
 
 			crds, err := pkg.LoadCRDs(resourcesOptionValue)
 			if err != nil {
