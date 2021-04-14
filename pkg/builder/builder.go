@@ -14,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/mesh-for-data/crdoc/pkg/functions"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
@@ -114,7 +115,11 @@ func (b *ModelBuilder) Output() error {
 		pattern = "**.tmpl"
 	}
 
-	return template.Must(template.New(file).Funcs(sprig.TxtFuncMap()).ParseFS(templatesFs, pattern)).Execute(f, *b.Model)
+	return template.Must(template.New(file).
+		Funcs(sprig.TxtFuncMap()).
+		Funcs(functions.ExportedMap).
+		ParseFS(templatesFs, pattern)).
+		Execute(f, *b.Model)
 }
 
 func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
