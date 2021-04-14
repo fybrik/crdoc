@@ -26,7 +26,7 @@ jobs:
         with:
           version: ${{ steps.previoustag.outputs.tag }}
       - name: 'Verify input version'
-        if: "!contains([steps.semvers.outputs.v_major, steps.semvers.outputs.v_minor, steps.semvers.outputs.v_patch], github.event.inputs.version)"
+        if: github.event.inputs.version != steps.semvers.outputs.v_major && github.event.inputs.version != steps.semvers.outputs.v_minor && github.event.inputs.version != steps.semvers.outputs.v_patch
         run: exit 1
       - name: 'Create new tag'
         if: success()
