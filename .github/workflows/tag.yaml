@@ -38,4 +38,3 @@ jobs:
               ref: "refs/tags/${{ github.event.inputs.version }}",
               sha: context.sha
             })
-  
