@@ -32,7 +32,7 @@ jobs:
         if: success()
         uses: actions/github-script@v4.0.2
         with:
-          github-token: ${{ secrets.ROEE_PSAT }}
+          github-token: ${{ secrets.TAG_PSAT }}
           script: |
             github.git.createRef({
               owner: context.repo.owner,
