@@ -3,6 +3,8 @@
 
 package builder
 
+import "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
+
 type Model struct {
 	Metadata PageMetadata  `yaml:"metadata"`
 	Groups   []*GroupModel `yaml:"groups"`
@@ -43,6 +45,7 @@ type FieldModel struct {
 	TypeKey     *string
 	Description string
 	Required    bool
+	Schema      apiextensions.JSONSchemaProps
 }
 
 func (m *Model) findGroupModel(group, version string) *GroupModel {
