@@ -52,7 +52,9 @@ Resource Types:
       </tr><tr>
         <td><b><a href="#examplemessagesindexkey">messages</a></b></td>
         <td>[]map[string]object</td>
-        <td></td>
+        <td>
+          <br/>
+        </td>
         <td>false</td>
       </tr></tbody>
 </table>
@@ -77,17 +79,30 @@ Resource Types:
     <tbody><tr>
         <td><b>area</b></td>
         <td>enum</td>
-        <td>Area... [East West]</td>
+        <td>
+          Some area<br/>
+          <br/>
+            <i>Enum</i>: East, West<br/>
+        </td>
         <td>false</td>
       </tr><tr>
         <td><b>code</b></td>
         <td>integer</td>
-        <td></td>
+        <td>
+          Some code<br/>
+          <br/>
+            <i>Format</i>: int32<br/>
+            <i>Default</i>: 7<br/>
+            <i>Minimum</i>: 0<br/>
+            <i>Maximum</i>: 10<br/>
+        </td>
         <td>false</td>
       </tr><tr>
         <td><b>text</b></td>
         <td>string</td>
-        <td></td>
+        <td>
+          Just text<br/>
+        </td>
         <td>false</td>
       </tr></tbody>
 </table>

@@ -161,9 +161,6 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			}
 
 			fieldDescription := property.Description
-			if fieldTypename == "enum" {
-				fieldDescription = fmt.Sprintf("%s %s", fieldDescription, property.Enum)
-			}
 
 			// Create field model
 			fieldModel := &FieldModel{
@@ -172,6 +169,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 				TypeKey:     fieldTypeKey,
 				Description: fieldDescription,
 				Required:    containsString(fieldName, schema.Required),
+				Schema:      property,
 			}
 			typeModel.Fields = append(typeModel.Fields, fieldModel)
 		}

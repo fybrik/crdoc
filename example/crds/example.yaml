@@ -23,12 +23,18 @@ spec:
               additionalProperties:
                 properties:
                   code:
+                    description: Some code
                     type: integer
+                    format: int32
+                    default: 7
+                    minimum: 0
+                    maximum: 10
                   text:
+                    description: Just text
                     type: string
                   area:
                     type: string
-                    description: Area...
+                    description: Some area
                     enum:
                       - East
                       - West
