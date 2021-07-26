@@ -1,4 +1,4 @@
-module github.com/mesh-for-data/crdoc
+module fybrik.io/crdoc
 
 go 1.16
 
