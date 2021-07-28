@@ -1,0 +1,84 @@
+# API Reference
+
+Packages:
+{{range .Groups }}
+- <<{{ anchorize (printf "%s/%s" .Group .Version) }},{{.Group}}/{{.Version}}>>
+{{ end -}}
+
+{{ range .Groups -}}
+{{ $group := . }}
+## [[{{ anchorize (printf "%s/%s" .Group .Version) }}]]{{.Group}}/{{.Version}}
+
+Resource Types:
+{{range .Kinds }}
+- <<{{ anchorize .Name }},{{.Name}}>>
+{{end -}}
+
+{{range .Kinds -}}
+{{$kind := .}}
+### [[{{ anchorize .Name }}]]{{.Name}}
+<<{{ anchorize (printf "%s/%s" $group.Group $group.Version) }},↩ Parent>>
+
+{{- range .Types -}}
+{{if not .IsTopLevel}}
+#### [[{{ anchorize .Name }}]]{{.Name}}
+{{if .ParentKey}}<<{{.ParentKey}},↩ Parent>>{{end -}}
+{{end}}
+
+{{.Description}}
+
+[cols="2,1,6,1",options=header]
+|===
+| Name
+| Type
+| Description
+| Required
+
+{{ if .IsTopLevel -}}
+| *apiVersion*
+| string
+| {{$group.Group}}.{{$group.Version}}
+| true
+
+| *kind*
+| string
+| {{$kind.Name}}
+| true
+
+| https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[metadata]
+| object
+| Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+| true
+{{ end }}
+
+{{ range .Fields -}}
+
+| *{{if .TypeKey}}<<{{.TypeKey}},{{.Name}}>>{{else}}{{.Name}}{{end}}*
+| {{.Type}}
+a| {{.Description}}
+
+{{ if .Schema.Format -}}
+* _Format_: {{ .Schema.Format }}
+{{ end -}}
+{{ if .Schema.Enum -}}
+* _Enum_: {{ .Schema.Enum | toStrings | join ", " }}
+{{ end -}}
+{{ if .Schema.Default -}}
+* _Default_: {{ .Schema.Default }}
+{{ end -}}
+{{ if .Schema.Minimum -}}
+* _Minimum_: {{ .Schema.Minimum }}
+{{ end -}}
+{{ if .Schema.Maximum -}}
+* _Maximum_: {{ .Schema.Maximum }}
+{{ end -}}
+
+| {{.Required}}
+
+{{ end -}}
+
+|===
+
+{{ end}}{{/* range .Types */}}
+{{ end}}{{/* range .Kinds */}}
+{{ end}}{{/* range .Groups */}}
