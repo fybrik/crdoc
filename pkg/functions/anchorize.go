@@ -24,7 +24,7 @@ import (
 
 	"golang.org/x/text/transform"
 
-	"github.com/mesh-for-data/crdoc/pkg/pools"
+	"fybrik.io/crdoc/pkg/pools"
 )
 
 // Anchorize sanitizes anchor names using GitHub style anchors.

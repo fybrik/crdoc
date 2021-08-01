@@ -1,23 +1,23 @@
 # crdoc
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/mesh-for-data/crdoc)](https://goreportcard.com/report/github.com/mesh-for-data/crdoc)
-[![Go Reference](https://pkg.go.dev/badge/github.com/mesh-for-data/crdoc.svg)](https://pkg.go.dev/github.com/mesh-for-data/crdoc)
-[![golangci-lint](https://github.com/mesh-for-data/crdoc/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/golangci-lint.yml)
-[![CodeQL](https://github.com/mesh-for-data/crdoc/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/codeql-analysis.yml)
-[![gosec](https://github.com/mesh-for-data/crdoc/actions/workflows/golang-security.yml/badge.svg)](https://github.com/mesh-for-data/crdoc/actions/workflows/golang-security.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/fybrik/crdoc)](https://goreportcard.com/report/github.com/fybrik/crdoc)
+[![Go Reference](https://pkg.go.dev/badge/github.com/fybrik/crdoc.svg)](https://pkg.go.dev/github.com/fybrik/crdoc)
+[![golangci-lint](https://github.com/fybrik/crdoc/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/fybrik/crdoc/actions/workflows/golangci-lint.yml)
+[![CodeQL](https://github.com/fybrik/crdoc/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/fybrik/crdoc/actions/workflows/codeql-analysis.yml)
+[![gosec](https://github.com/fybrik/crdoc/actions/workflows/golang-security.yml/badge.svg)](https://github.com/fybrik/crdoc/actions/workflows/golang-security.yml)
 
 Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML files.
 
 ## Install
 
-Download the appropriate version for your platform from [Releases](https://github.com/mesh-for-data/crdoc/releases/latest).
+Download the appropriate version for your platform from [Releases](https://github.com/fybrik/crdoc/releases/latest).
 You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
 
 Alternatively, if you have go 1.16 or later then you can also use `go install`. 
 This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 
 ```bash
-go install github.com/mesh-for-data/crdoc@latest
+go install fybrik.io/crdoc@latest
 ```
 
 ## Usage
