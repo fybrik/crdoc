@@ -30,10 +30,13 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 
 	// Glob ignores file system errors, so check the supplied path when there
 	// are no results. When it is a file, treat it like a single result from
-	// Glob.
+	// Glob. When it does not exist, return an error.
 	if len(files) == 0 {
 		info, err := os.Stat(dirpath)
-		if err == nil && !info.IsDir() {
+		if err != nil {
+			return nil, err
+		}
+		if !info.IsDir() {
 			files = append(files, dirpath)
 		}
 	}
