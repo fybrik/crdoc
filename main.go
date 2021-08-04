@@ -83,7 +83,7 @@ func RootCmd() *cobra.Command {
 
 	cmd.Flags().StringP(outputOption, "o", "", "Path to output markdown file (required)")
 	_ = cmd.MarkFlagRequired(outputOption)
-	cmd.Flags().StringP(resourcesOption, "r", "", "Path to directory with CustomResourceDefinition YAML files (required)")
+	cmd.Flags().StringP(resourcesOption, "r", "", "Path to YAML file or directory containing CustomResourceDefinitions (required)")
 	_ = cmd.MarkFlagRequired(resourcesOption)
 	cmd.Flags().StringP(templateOption, "t", "markdown.tmpl", "Path to file in a templates directory")
 	cmd.Flags().StringP(tocOption, "c", "", "Path to table of contents YAML file")

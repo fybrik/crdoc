@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,19 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 	files, err := filepath.Glob(path.Join(dirpath, "*"))
 	if err != nil {
 		return nil, err
+	}
+
+	// Glob ignores file system errors, so check the supplied path when there
+	// are no results. When it is a file, treat it like a single result from
+	// Glob. When it does not exist, return an error.
+	if len(files) == 0 {
+		info, err := os.Stat(dirpath)
+		if err != nil {
+			return nil, err
+		}
+		if !info.IsDir() {
+			files = append(files, dirpath)
+		}
 	}
 
 	resources := []*apiextensions.CustomResourceDefinition{}
