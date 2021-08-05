@@ -36,3 +36,6 @@ changelog:
       - '^ci:'
       - '^docs:'
       - '^test:'
+      - '^style:'
+      - '^refactor:'
+      - '^build(deps):'
