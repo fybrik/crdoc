@@ -44,7 +44,7 @@ Examples:
 Flags:
   -h, --help               help for crdoc
   -o, --output string      Path to output markdown file (required)
-  -r, --resources string   Path to directory with CustomResourceDefinition YAML files (required)
+  -r, --resources string   Path to YAML file or directory containing CustomResourceDefinitions (required)
   -t, --template string    Path to file in a templates directory (default "markdown.tmpl")
   -c, --toc string         Path to table of contents YAML file
 ```
