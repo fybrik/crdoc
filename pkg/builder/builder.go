@@ -220,7 +220,7 @@ func getTypeName(props *apiextensions.JSONSchemaProps) string {
 
 	// map
 	if props.Type == "object" && props.AdditionalProperties != nil {
-		if props.AdditionalProperties.Schema == nil && props.AdditionalItems.Allows {
+		if props.AdditionalProperties.Schema == nil && props.AdditionalProperties.Allows {
 			return "map[string]string"
 		}
 		return "map[string]"
