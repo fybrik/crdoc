@@ -50,6 +50,15 @@ Resource Types:
       <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
       <td>true</td>
       </tr><tr>
+        <td><b>arbitrary</b></td>
+        <td>map[string]string</td>
+        <td>
+          arbitrary field<br/>
+          <br/>
+            <i>Default</i>: map[]<br/>
+        </td>
+        <td>false</td>
+      </tr><tr>
         <td><b><a href="#examplemessagesindexkey">messages</a></b></td>
         <td>[]map[string]object</td>
         <td>
