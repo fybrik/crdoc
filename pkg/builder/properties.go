@@ -37,10 +37,10 @@ func (s propertiesByRequired) Less(i, j int) bool {
 	}
 
 	if leftRequired && !rightRequired {
-		return false
+		return true
 	}
 	if !leftRequired && rightRequired {
-		return true
+		return false
 	}
 	return left < right
 }
