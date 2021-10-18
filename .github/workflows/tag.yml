@@ -28,6 +28,13 @@ jobs:
       - name: 'Verify input version'
         if: github.event.inputs.version != steps.semvers.outputs.v_major && github.event.inputs.version != steps.semvers.outputs.v_minor && github.event.inputs.version != steps.semvers.outputs.v_patch
         run: exit 1
+      - name: 'Update version file'
+        run: echo ${{ github.event.inputs.version }} >VERSION
+      - uses: EndBug/add-and-commit@v7
+        with:
+          default_author: github_actions
+          message: Update version number
+          add: 'VERSION'
       - name: 'Create new tag'
         if: success()
         uses: actions/github-script@v5

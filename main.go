@@ -25,6 +25,9 @@ const (
 //go:embed templates/*
 var builtinTemplates embed.FS
 
+//go:embed VERSION
+var version string
+
 // RootCmd defines the root cli command
 func RootCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -46,6 +49,7 @@ func RootCmd() *cobra.Command {
 		PreRun: func(cmd *cobra.Command, args []string) {
 			_ = viper.BindPFlags(cmd.Flags())
 		},
+		Version: strings.TrimSpace(version),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outputOptionValue := viper.GetString(outputOption)
 			templateOptionValue := viper.GetString(templateOption)
