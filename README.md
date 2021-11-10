@@ -20,6 +20,8 @@ This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 go install fybrik.io/crdoc@latest
 ```
 
+> :bulb: Prefer pinning to a specific version rather than using @latest when installing in a CI workflow
+
 ## Usage
 
 ```bash
