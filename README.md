@@ -13,7 +13,7 @@ Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML 
 Download the appropriate version for your platform from [Releases](https://github.com/fybrik/crdoc/releases/latest).
 You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
 
-Alternatively, if you have go 1.16 or later then you can also use `go install`. 
+Alternatively, if you have go 1.17 or later then you can also use `go install`. 
 This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 
 ```bash
