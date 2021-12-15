@@ -14,6 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.4.0
         with:
+          token: ${{ secrets.TAG_PSAT }}
           fetch-depth: 0
       - name: 'Get previous tag'
         id: previoustag
@@ -30,20 +31,10 @@ jobs:
         run: exit 1
       - name: 'Update version file'
         run: echo ${{ github.event.inputs.version }} >VERSION
-      - uses: EndBug/add-and-commit@v7
+      - name: 'Commit and tag'
+        uses: EndBug/add-and-commit@v7
         with:
           default_author: github_actions
           message: Update version number
           add: 'VERSION'
-      - name: 'Create new tag'
-        if: success()
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.TAG_PSAT }}
-          script: |
-            github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/${{ github.event.inputs.version }}",
-              sha: context.sha
-            })
+          tag: ${{ github.event.inputs.version }}
