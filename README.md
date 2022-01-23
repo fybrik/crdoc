@@ -10,10 +10,22 @@ Generate markdown documentation from Kubernetes `CustomResourceDefinition` YAML 
 
 ## Install
 
-Download the appropriate version for your platform from [Releases](https://github.com/fybrik/crdoc/releases/latest).
-You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
+Install `crdoc` using one of the following methods:
 
-Alternatively, if you have go 1.17 or later then you can also use `go install`. 
+
+<details>
+  <summary>Binary</summary>    
+
+Download the appropriate version for your platform from [Releases](https://github.com/fybrik/crdoc/releases/latest). You may want to install the binary to somewhere in your system's PATH such as `/usr/local/bin`.
+
+For convenience, an [installation script](https://raw.githubusercontent.com/fybrik/crdoc/main/hack/get-crdoc.sh) is also available:
+
+</details>
+
+<details>
+  <summary>Go install</summary>    
+
+If you have go 1.17 or later then you can use `go install`. 
 This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 
 ```bash
@@ -21,6 +33,21 @@ go install fybrik.io/crdoc@latest
 ```
 
 > :bulb: Prefer pinning to a specific version rather than using @latest when installing in a CI workflow
+
+</details>
+
+<details>
+  <summary>Docker images</summary>    
+
+[Docker images](https://github.com/fybrik/crdoc/pkgs/container/crdoc) are available and allow you to run `crdoc` directly via docker. For example:
+
+```bash
+docker run -u $(id -u):$(id -g) --rm -v ${PWD}:/workdir ghcr.io/fybrik/crdoc:latest --resources /workdir/example/crds --output /workdir/example/output.md
+```
+
+> :bulb: Prefer pinning to a specific version rather than using :latest when running in a CI workflow
+
+</details>
 
 ## Usage
 
@@ -49,6 +76,7 @@ Flags:
   -r, --resources string   Path to YAML file or directory containing CustomResourceDefinitions (required)
   -t, --template string    Path to file in a templates directory (default "markdown.tmpl")
   -c, --toc string         Path to table of contents YAML file
+  -v, --version            version for crdoc
 ```
 
 ## Limitations
