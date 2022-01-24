@@ -1,6 +1,4 @@
-FROM gcr.io/distroless/static:nonroot
+FROM registry.access.redhat.com/ubi8-minimal:latest
 WORKDIR /
 COPY crdoc .
-USER nonroot:nonroot
-
 ENTRYPOINT ["/crdoc"]
