@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Run on example
         run: |
           go run main.go --resources example/crds --output example/output.md
