@@ -34,6 +34,12 @@ spec:
                     default: 7
                     minimum: 0
                     maximum: 10
+                  sample:
+                    description: 'Selects a field of the pod:
+                      supports metadata.name, metadata.namespace,
+                      `metadata.labels[''<KEY>'']`, `metadata.annotations[''<KEY>'']`,
+                      spec.nodeName, spec.serviceAccountName,
+                      status.hostIP, status.podIP, status.podIPs.'
                   text:
                     description: Just text
                     type: string
