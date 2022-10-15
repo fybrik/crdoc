@@ -20,6 +20,6 @@ jobs:
           go run main.go --resources example/crds --output example/output.md
       - name: Check that there are no source code changes
         run: |
-          go mod tidy
+          go mod tidy -compat=1.17
           git checkout go.sum
           git diff --exit-code
