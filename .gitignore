@@ -13,3 +13,12 @@
 
 # Generated e.g. by LineCount and the example usage command
 out/
+
+# editor and IDE paraphernalia
+.idea
+*.swp
+*.swo
+*~
+.vscode
+.history
+.netrc
