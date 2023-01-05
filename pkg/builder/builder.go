@@ -136,12 +136,24 @@ func (b *ModelBuilder) Output() error {
 		Execute(f, *b.Model)
 }
 
+func concise(name string) string {
+	log.Println(name)
+	idx := strings.LastIndex(name, ".")
+	if idx >= 0 {
+		name = name[idx+1:]
+	}
+	name = strings.TrimSuffix(name, "[index]")
+	log.Println(name)
+	return name
+}
+
 func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
 	typeName := getTypeName(schema)
 	if typeName == "object" && schema.Properties != nil {
 		// Create an object type model
 		typeModel := &TypeModel{
 			Name:        name,
+			NameConcise: concise(name),
 			Key:         b.createKey(name),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,

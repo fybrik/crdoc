@@ -23,7 +23,10 @@ Resource Types:
 {{range .Types}}
 
 {{if not .IsTopLevel}}
-### {{.Name}}
+### <a id="{{ anchorize .Name }}"></a>{{.NameConcise}}
+
+*{{.Name}}*
+
 {{if .ParentKey}}<sup><sup>[↩ Parent](#{{.ParentKey}})</sup></sup>{{end}}
 {{end}}
 

@@ -32,6 +32,7 @@ type PageMetadata struct {
 
 type TypeModel struct {
 	Name        string
+	NameConcise string
 	Key         string
 	ParentKey   *string
 	Description string
