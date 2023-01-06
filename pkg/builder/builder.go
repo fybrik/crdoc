@@ -137,13 +137,11 @@ func (b *ModelBuilder) Output() error {
 }
 
 func concise(name string) string {
-	log.Println(name)
 	idx := strings.LastIndex(name, ".")
 	if idx >= 0 {
 		name = name[idx+1:]
 	}
 	name = strings.TrimSuffix(name, "[index]")
-	log.Println(name)
 	return name
 }
 
