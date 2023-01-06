@@ -23,7 +23,8 @@ Resource Types:
 {{range .Types}}
 
 {{if not .IsTopLevel}}
-### <a id="{{ anchorize .Name }}"></a>{{.NameConcise}}
+<a id="{{ anchorize .Name }}"></a>
+##{{.Headings}} {{.NameConcise}} 
 
 *{{.Name}}*
 

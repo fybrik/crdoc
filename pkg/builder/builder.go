@@ -145,6 +145,11 @@ func concise(name string) string {
 	return name
 }
 
+func headings(name string) string {
+	count := strings.Count(name, ".")
+	return strings.Repeat("#", count)
+}
+
 func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindModel, name string, schema *apiextensions.JSONSchemaProps, isTopLevel bool) (string, *TypeModel) {
 	typeName := getTypeName(schema)
 	if typeName == "object" && schema.Properties != nil {
@@ -155,6 +160,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			Key:         b.createKey(name),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,
+			Headings:    headings(name),
 		}
 		kindModel.Types = append(kindModel.Types, typeModel)
 
