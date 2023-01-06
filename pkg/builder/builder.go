@@ -141,7 +141,7 @@ func concise(name string) string {
 	if idx >= 0 {
 		name = name[idx+1:]
 	}
-	name = strings.TrimSuffix(name, "[index]")
+	name = strings.TrimSuffix(name, "[]")
 	return name
 }
 
@@ -192,7 +192,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		return typeName, typeModel
 	} else if typeName == "[]" {
 		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
-			fmt.Sprintf("%s[index]", name), schema.Items.Schema, false)
+			fmt.Sprintf("%s[]", name), schema.Items.Schema, false)
 		return "[]" + childTypeName, childTypeModel
 	} else if typeName == "map[string]" {
 		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
