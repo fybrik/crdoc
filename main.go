@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	pkg "fybrik.io/crdoc/pkg/builder"
+	pkg "github.com/sj14/crdoc/pkg/builder"
 )
 
 const (

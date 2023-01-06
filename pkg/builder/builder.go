@@ -13,9 +13,9 @@ import (
 	"strings"
 	"text/template"
 
-	"fybrik.io/crdoc/pkg/functions"
 	"github.com/Masterminds/sprig/v3"
 	log "github.com/sirupsen/logrus"
+	"github.com/sj14/crdoc/pkg/functions"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
 

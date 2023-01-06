@@ -1,4 +1,4 @@
-module fybrik.io/crdoc
+module github.com/sj14/crdoc
 
 go 1.17
 
