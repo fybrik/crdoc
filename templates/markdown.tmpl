@@ -12,7 +12,7 @@
 {{range .Types}}
 
 {{if not .IsTopLevel}}
-<a id="#{{ anchorize .Name }}"></a>
+<a id="{{ anchorize .Name }}"></a>
 ##{{.Headings}} {{.Name}}
 
 {{if .ParentKeys}}
