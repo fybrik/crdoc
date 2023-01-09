@@ -1,19 +1,8 @@
 # API Reference
 
-Packages:
-{{range .Groups}}
-- [{{.Group}}/{{.Version}}](#{{ anchorize (printf "%s/%s" .Group .Version) }})
-{{- end -}}{{/* range .Groups */}}
-
 {{- range .Groups }}
 {{- $group := . }}
 
-# {{.Group}}/{{.Version}}
-
-Resource Types:
-{{range .Kinds}}
-- [{{.Name}}](#{{ anchorize .Name }})
-{{end}}{{/* range .Kinds */}}
 
 {{range .Kinds}}
 {{$kind := .}}
@@ -23,12 +12,16 @@ Resource Types:
 {{range .Types}}
 
 {{if not .IsTopLevel}}
-<a id="{{ anchorize .Name }}"></a>
-##{{.Headings}} {{.NameConcise}} 
+<a id="#{{ anchorize .Name }}"></a>
+##{{.Headings}} {{.Name}}
 
-*{{.Name}}*
+{{if .ParentKeys}}
+Parents:
+{{range $index, $element := .ParentKeys}}
+<sup><sup>[↩ {{$element}}](#{{anchorize $element}})</sup></sup>
+{{end}}
 
-{{if .ParentKey}}<sup><sup>[↩ Parent](#{{.ParentKey}})</sup></sup>{{end}}
+{{end}}
 {{end}}
 
 
@@ -46,19 +39,19 @@ Resource Types:
     <tbody>
       {{- if .IsTopLevel -}}
       <tr>
-      <td><b>apiVersion</b></td>
+      <td>apiVersion</td>
       <td>string</td>
       <td>{{$group.Group}}/{{$group.Version}}</td>
       <td>true</td>
       </tr>
       <tr>
-      <td><b>kind</b></td>
+      <td>kind</td>
       <td>string</td>
       <td>{{$kind.Name}}</td>
       <td>true</td>
       </tr>
       <tr>
-      <td><b><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">metadata</a></b></td>
+      <td><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">metadata</a></td>
       <td>object</td>
       <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
       <td>true</td>
@@ -66,7 +59,7 @@ Resource Types:
       {{- end -}}
       {{- range .Fields -}}
       <tr>
-        <td><b>{{if .TypeKey}}<a href="#{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
+        <td>{{if .TypeKey}}<a href="#{{anchorize .Name}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</td>
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>

@@ -31,10 +31,11 @@ type PageMetadata struct {
 }
 
 type TypeModel struct {
+	Order       int
 	Name        string
 	NameConcise string
 	Key         string
-	ParentKey   *string
+	ParentKeys  []*string
 	Description string
 	IsTopLevel  bool
 	Headings    string

@@ -16,6 +16,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/sj14/crdoc/pkg/functions"
+	"golang.org/x/exp/slices"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 )
 
@@ -96,8 +97,36 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 	return nil
 }
 
+func (b *ModelBuilder) deduplicateTypeModels() {
+	for _, group := range b.Model.Groups {
+		for idxKind := range group.Kinds {
+			unique := make(map[string]*TypeModel)
+
+			for idx := range group.Kinds[idxKind].Types {
+				if _, ok := unique[group.Kinds[idxKind].Types[idx].NameConcise]; ok {
+					unique[group.Kinds[idxKind].Types[idx].NameConcise].ParentKeys = append(unique[group.Kinds[idxKind].Types[idx].NameConcise].ParentKeys, group.Kinds[idxKind].Types[idx].ParentKeys...)
+					continue
+				}
+				group.Kinds[idxKind].Types[idx].Order = idx
+				unique[group.Kinds[idxKind].Types[idx].NameConcise] = group.Kinds[idxKind].Types[idx]
+			}
+			group.Kinds[idxKind].Types = nil
+
+			for idx := range unique {
+				group.Kinds[idxKind].Types = append(group.Kinds[idxKind].Types, unique[idx])
+			}
+
+			slices.SortFunc(group.Kinds[idxKind].Types, func(a, b *TypeModel) bool {
+				return a.Order < b.Order
+			})
+		}
+	}
+}
+
 // Output writes markdown to the output direcory
 func (b *ModelBuilder) Output() error {
+	b.deduplicateTypeModels()
+
 	outputFilepath := filepath.Clean(b.OutputFilepath)
 
 	// create dirs if needed
@@ -155,9 +184,9 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 	if typeName == "object" && schema.Properties != nil {
 		// Create an object type model
 		typeModel := &TypeModel{
-			Name:        name,
+			Name:        concise(name),
 			NameConcise: concise(name),
-			Key:         b.createKey(name),
+			Key:         concise(name),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,
 			Headings:    headings(name),
@@ -173,7 +202,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			var fieldTypeKey *string = nil
 			if fieldTypeModel != nil {
 				fieldTypeKey = &fieldTypeModel.Key
-				fieldTypeModel.ParentKey = &typeModel.Key
+				fieldTypeModel.ParentKeys = append(fieldTypeModel.ParentKeys, &typeModel.Key)
 			}
 
 			fieldDescription := property.Description
