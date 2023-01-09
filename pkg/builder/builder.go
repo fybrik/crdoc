@@ -98,25 +98,32 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 }
 
 func (b *ModelBuilder) deduplicateTypeModels() {
-	for _, group := range b.Model.Groups {
-		for idxKind := range group.Kinds {
+	for idxGroup, group := range b.Model.Groups {
+		group = b.Model.Groups[idxGroup]
+		for idxKind, kinds := range group.Kinds {
+			kinds = group.Kinds[idxKind]
 			unique := make(map[string]*TypeModel)
 
-			for idx := range group.Kinds[idxKind].Types {
-				if _, ok := unique[group.Kinds[idxKind].Types[idx].NameConcise]; ok {
-					unique[group.Kinds[idxKind].Types[idx].NameConcise].ParentKeys = append(unique[group.Kinds[idxKind].Types[idx].NameConcise].ParentKeys, group.Kinds[idxKind].Types[idx].ParentKeys...)
+			for idxTypes, typeModel := range kinds.Types {
+				typeModel = kinds.Types[idxTypes]
+				if _, ok := unique[typeModel.NameConcise]; ok {
+					for _, key := range typeModel.ParentKeys {
+						if !slices.Contains(unique[typeModel.NameConcise].ParentKeys, key) {
+							unique[typeModel.NameConcise].ParentKeys = append(unique[typeModel.NameConcise].ParentKeys, key)
+						}
+					}
 					continue
 				}
-				group.Kinds[idxKind].Types[idx].Order = idx
-				unique[group.Kinds[idxKind].Types[idx].NameConcise] = group.Kinds[idxKind].Types[idx]
+				typeModel.Order = idxTypes
+				unique[typeModel.NameConcise] = typeModel
 			}
-			group.Kinds[idxKind].Types = nil
+			kinds.Types = nil
 
 			for idx := range unique {
-				group.Kinds[idxKind].Types = append(group.Kinds[idxKind].Types, unique[idx])
+				kinds.Types = append(kinds.Types, unique[idx])
 			}
 
-			slices.SortFunc(group.Kinds[idxKind].Types, func(a, b *TypeModel) bool {
+			slices.SortFunc(kinds.Types, func(a, b *TypeModel) bool {
 				return a.Order < b.Order
 			})
 		}
@@ -202,7 +209,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			var fieldTypeKey *string = nil
 			if fieldTypeModel != nil {
 				fieldTypeKey = &fieldTypeModel.Key
-				fieldTypeModel.ParentKeys = append(fieldTypeModel.ParentKeys, &typeModel.Key)
+				fieldTypeModel.ParentKeys = append(fieldTypeModel.ParentKeys, typeModel.Key)
 			}
 
 			fieldDescription := property.Description

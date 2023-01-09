@@ -35,7 +35,7 @@ type TypeModel struct {
 	Name        string
 	NameConcise string
 	Key         string
-	ParentKeys  []*string
+	ParentKeys  []string
 	Description string
 	IsTopLevel  bool
 	Headings    string
