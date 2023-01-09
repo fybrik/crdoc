@@ -19,8 +19,8 @@ type GroupModel struct {
 
 type KindModel struct {
 	// Metadata PageMetadata `yaml:"metadata"`
-	Name string `yaml:"name"`
-
+	Name  string `yaml:"name"`
+	Key   string
 	Types []*TypeModel
 }
 

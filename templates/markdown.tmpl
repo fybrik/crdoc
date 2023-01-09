@@ -6,8 +6,8 @@
 
 {{range .Kinds}}
 {{$kind := .}}
+<a id="{{ anchorize .Name }}"></a>
 ## {{.Name}}
-<sup><sup>[↩ Parent](#{{ anchorize (printf "%s/%s" $group.Group $group.Version) }} )</sup></sup>
 
 {{range .Types}}
 
@@ -19,7 +19,11 @@
 Used By:
 
 {{- range $index, $parent := .Parents}}
+{{- if eq $parent.Name $kind.Name }}
+- [{{$parent.Name}}](#{{anchorize $parent.Name}})
+{{- else }}
 - [{{$parent.Name}}](#{{anchorize $parent.Key}})
+{{- end }}
 {{- end}}
 
 {{- end}}

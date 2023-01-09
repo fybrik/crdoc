@@ -105,9 +105,9 @@ type mapKey struct {
 	DescHash string
 }
 
-func fieldsHash(desc string) string {
+func hash(s string) string {
 	var b bytes.Buffer
-	gob.NewEncoder(&b).Encode(desc)
+	gob.NewEncoder(&b).Encode(s)
 	return fmt.Sprintf("%x", sha1.Sum(b.Bytes()))
 }
 
@@ -119,12 +119,12 @@ func (b *ModelBuilder) deduplicateTypeModels() {
 			unique := make(map[mapKey]*TypeModel)
 			for idxTypes, typeModel := range kinds.Types {
 				typeModel = kinds.Types[idxTypes]
-				curKey := mapKey{Name: typeModel.NameConcise, DescHash: fieldsHash(typeModel.Description)}
+				curKey := mapKey{Name: typeModel.NameConcise, DescHash: hash(typeModel.Description)}
 
 				if _, ok := unique[curKey]; ok {
 					for _, key := range typeModel.Parents {
 						if !slices.Contains(unique[curKey].Parents, key) {
-							unique[curKey].Parents = append(unique[curKey].Parents, Parent{Key: fmt.Sprintf("%s-%s", key, fieldsHash(typeModel.Description)), Name: typeModel.Name})
+							unique[curKey].Parents = append(unique[curKey].Parents, Parent{Key: fmt.Sprintf("%s-%s", key, hash(typeModel.Description)), Name: typeModel.Name})
 						}
 					}
 					continue
@@ -208,7 +208,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		typeModel := &TypeModel{
 			Name:        concise(name),
 			NameConcise: concise(name),
-			Key:         concise(name) + "-" + fieldsHash(schema.Description),
+			Key:         concise(name) + "-" + hash(schema.Description),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,
 			Headings:    headings(name),
