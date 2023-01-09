@@ -4,7 +4,10 @@
 package builder
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"embed"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -97,25 +100,37 @@ func (b *ModelBuilder) Add(crd *apiextensions.CustomResourceDefinition) error {
 	return nil
 }
 
+type mapKey struct {
+	Name     string
+	DescHash string
+}
+
+func fieldsHash(desc string) string {
+	var b bytes.Buffer
+	gob.NewEncoder(&b).Encode(desc)
+	return fmt.Sprintf("%x", sha1.Sum(b.Bytes()))
+}
+
 func (b *ModelBuilder) deduplicateTypeModels() {
 	for idxGroup, group := range b.Model.Groups {
 		group = b.Model.Groups[idxGroup]
 		for idxKind, kinds := range group.Kinds {
 			kinds = group.Kinds[idxKind]
-			unique := make(map[string]*TypeModel)
-
+			unique := make(map[mapKey]*TypeModel)
 			for idxTypes, typeModel := range kinds.Types {
 				typeModel = kinds.Types[idxTypes]
-				if _, ok := unique[typeModel.NameConcise]; ok {
-					for _, key := range typeModel.ParentKeys {
-						if !slices.Contains(unique[typeModel.NameConcise].ParentKeys, key) {
-							unique[typeModel.NameConcise].ParentKeys = append(unique[typeModel.NameConcise].ParentKeys, key)
+				curKey := mapKey{Name: typeModel.NameConcise, DescHash: fieldsHash(typeModel.Description)}
+
+				if _, ok := unique[curKey]; ok {
+					for _, key := range typeModel.Parents {
+						if !slices.Contains(unique[curKey].Parents, key) {
+							unique[curKey].Parents = append(unique[curKey].Parents, Parent{Key: fmt.Sprintf("%s-%s", key, fieldsHash(typeModel.Description)), Name: typeModel.Name})
 						}
 					}
 					continue
 				}
 				typeModel.Order = idxTypes
-				unique[typeModel.NameConcise] = typeModel
+				unique[curKey] = typeModel
 			}
 			kinds.Types = nil
 
@@ -193,7 +208,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		typeModel := &TypeModel{
 			Name:        concise(name),
 			NameConcise: concise(name),
-			Key:         concise(name),
+			Key:         concise(name) + "-" + fieldsHash(schema.Description),
 			Description: schema.Description,
 			IsTopLevel:  isTopLevel,
 			Headings:    headings(name),
@@ -209,7 +224,7 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 			var fieldTypeKey *string = nil
 			if fieldTypeModel != nil {
 				fieldTypeKey = &fieldTypeModel.Key
-				fieldTypeModel.ParentKeys = append(fieldTypeModel.ParentKeys, typeModel.Key)
+				fieldTypeModel.Parents = append(fieldTypeModel.Parents, Parent{Name: typeModel.Name, Key: typeModel.Key})
 			}
 
 			fieldDescription := property.Description

@@ -35,11 +35,16 @@ type TypeModel struct {
 	Name        string
 	NameConcise string
 	Key         string
-	ParentKeys  []string
+	Parents     []Parent
 	Description string
 	IsTopLevel  bool
 	Headings    string
 	Fields      []*FieldModel
+}
+
+type Parent struct {
+	Name string
+	Key  string
 }
 
 type FieldModel struct {

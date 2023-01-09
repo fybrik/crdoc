@@ -12,18 +12,18 @@
 {{range .Types}}
 
 {{if not .IsTopLevel}}
-<a id="{{ anchorize .Name }}"></a>
+<a id="{{ anchorize .Key }}"></a>
 ##{{.Headings}} {{.Name}}
 
-{{if .ParentKeys}}
-Parents:
-{{range $index, $element := .ParentKeys}}
-<sup><sup>[↩ {{$element}}](#{{anchorize $element}})</sup></sup>
-{{end}}
+{{ if .Parents}}
+Used By:
 
-{{end}}
-{{end}}
+{{- range $index, $parent := .Parents}}
+- [{{$parent.Name}}](#{{anchorize $parent.Key}})
+{{- end}}
 
+{{- end}}
+{{- end}}
 
 {{.Description}}
 
@@ -59,7 +59,7 @@ Parents:
       {{- end -}}
       {{- range .Fields -}}
       <tr>
-        <td>{{if .TypeKey}}<a href="#{{anchorize .Name}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</td>
+        <td>{{if .TypeKey}}<a href="#{{anchorize .TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</td>
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>
