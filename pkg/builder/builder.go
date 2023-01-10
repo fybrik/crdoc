@@ -4,10 +4,8 @@
 package builder
 
 import (
-	"bytes"
 	"crypto/sha1"
 	"embed"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -105,10 +103,9 @@ type mapKey struct {
 	DescHash string
 }
 
+// First 7 chars of a hash of s.
 func hash(s string) string {
-	var b bytes.Buffer
-	gob.NewEncoder(&b).Encode(s)
-	return fmt.Sprintf("%x", sha1.Sum(b.Bytes()))
+	return fmt.Sprintf("%x", sha1.Sum([]byte(s)))[:7]
 }
 
 func (b *ModelBuilder) deduplicateTypeModels() {
@@ -122,9 +119,10 @@ func (b *ModelBuilder) deduplicateTypeModels() {
 				curKey := mapKey{Name: typeModel.NameConcise, DescHash: hash(typeModel.Description)}
 
 				if _, ok := unique[curKey]; ok {
+					// model already exists. add the parent if not already added.
 					for _, key := range typeModel.Parents {
 						if !slices.Contains(unique[curKey].Parents, key) {
-							unique[curKey].Parents = append(unique[curKey].Parents, Parent{Key: fmt.Sprintf("%s-%s", key, hash(typeModel.Description)), Name: typeModel.Name})
+							unique[curKey].Parents = append(unique[curKey].Parents, Parent{Key: key.Key, Name: key.Name})
 						}
 					}
 					continue
