@@ -6,7 +6,6 @@ package builder
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -45,7 +44,7 @@ func LoadCRDs(dirpath string) ([]*apiextensions.CustomResourceDefinition, error)
 
 	for _, file := range files {
 		// Read file
-		filecontent, err := ioutil.ReadFile(filepath.Clean(file))
+		filecontent, err := os.ReadFile(filepath.Clean(file))
 		if err != nil {
 			return nil, err
 		}
