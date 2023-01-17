@@ -25,7 +25,7 @@ For convenience, an [installation script](https://raw.githubusercontent.com/fybr
 <details>
   <summary>Go install</summary>    
 
-If you have go 1.17 or later then you can use `go install`. 
+If you have goLang 1.19 or later then you can use `go install`. 
 This will put the latest released version of `crdoc` in `$(go env GOPATH)/bin`:
 
 ```bash
