@@ -4,7 +4,7 @@
 package builder
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	yaml "gopkg.in/yaml.v2"
@@ -14,7 +14,7 @@ import (
 func LoadModel(file string) (*Model, error) {
 	model := &Model{}
 	if file != "" {
-		filecontent, err := ioutil.ReadFile(filepath.Clean(file))
+		filecontent, err := os.ReadFile(filepath.Clean(file))
 		if err != nil {
 			return nil, err
 		}
