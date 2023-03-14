@@ -57,6 +57,13 @@ Resource Types:
 | {{.Type}}
 a| {{.Description}}
 
+{{if .Schema.XValidations -}}
+* _Validations_:
+{{- range .Schema.XValidations -}}
+** {{ .Rule }}: {{ .Message }}
+{{- end -}}
+{{end -}}
+
 {{ if .Schema.Format -}}
 * _Format_: {{ .Schema.Format }}
 {{ end -}}

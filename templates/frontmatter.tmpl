@@ -72,9 +72,15 @@ Resource Types:
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>
-          {{- if or .Schema.Format .Schema.Enum .Schema.Default .Schema.Minimum .Schema.Maximum }}
+          {{- if or .Schema.XValidations .Schema.Format .Schema.Enum .Schema.Default .Schema.Minimum .Schema.Maximum }}
           <br/>
           {{- end}}
+          {{- if .Schema.XValidations }}
+            <i>Validations</i>:
+            {{- range .Schema.XValidations -}}
+              <li>{{ .Rule }}: {{ .Message }}</li>
+            {{- end -}}
+          {{- end }}
           {{- if .Schema.Format }}
             <i>Format</i>: {{ .Schema.Format }}<br/>
           {{- end }}
