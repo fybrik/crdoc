@@ -2,7 +2,7 @@
 title: {{or .Metadata.Title "API Reference"}}
 weight: {{or .Metadata.Weight 1 }}
 {{- if .Metadata.Description}}
-description: {{.Metadata.Description}}
+description: {{ escape .Metadata.Description}}
 {{- end}}
 ---
 
@@ -71,7 +71,7 @@ Resource Types:
         <td><b>{{if .TypeKey}}<a href="{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
         <td>{{.Type}}</td>
         <td>
-          {{.Description}}<br/>
+          {{ escape .Description }}<br/>
           {{- if or .Schema.Format .Schema.Enum .Schema.Default .Schema.Minimum .Schema.Maximum }}
           <br/>
           {{- end}}

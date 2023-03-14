@@ -107,6 +107,13 @@ Resource Types:
         </td>
         <td>false</td>
       </tr><tr>
+        <td><b>sample</b></td>
+        <td></td>
+        <td>
+          Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs.<br/>
+        </td>
+        <td>false</td>
+      </tr><tr>
         <td><b>text</b></td>
         <td>string</td>
         <td>
