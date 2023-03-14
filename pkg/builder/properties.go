@@ -128,6 +128,10 @@ func getEnrichedProperty(schema *apiextensions.JSONSchemaProps, fieldName string
 		if property.Required == nil {
 			property.Required = validationProperty.Required
 		}
+		if property.XValidations == nil {
+			property.XValidations = validationProperty.XValidations
+		}
+
 	}
 
 	return property
