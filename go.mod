@@ -10,7 +10,7 @@ require (
 	golang.org/x/text v0.9.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apiextensions-apiserver v0.27.2
-	k8s.io/apimachinery v0.27.2
+	k8s.io/apimachinery v0.27.4
 	k8s.io/client-go v0.27.2
 )
 
