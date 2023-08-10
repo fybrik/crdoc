@@ -30,7 +30,7 @@ Resource Types:
 
 {{if not .IsTopLevel}}
 ### {{.Name}}
-{{if .ParentKey}}<sup><sup>[↩ Parent]({{.ParentKey}})</sup></sup>{{end}}
+{{if .ParentKey}}<sup><sup>[↩ Parent](#{{.ParentKey}})</sup></sup>{{end}}
 {{end}}
 
 
@@ -68,7 +68,7 @@ Resource Types:
       {{- end -}}
       {{- range .Fields -}}
       <tr>
-        <td><b>{{if .TypeKey}}<a href="{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
+        <td><b>{{if .TypeKey}}<a href="#{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>
