@@ -30,7 +30,7 @@ Resource Types:
 
 {{if not .IsTopLevel}}
 ### {{.Name}}
-{{if .ParentKey}}<sup><sup>[↩ Parent]({{.ParentKey}})</sup></sup>{{end}}
+{{if .ParentKey}}<sup><sup>[↩ Parent](#{{.ParentKey}})</sup></sup>{{end}}
 {{end}}
 
 
@@ -60,7 +60,7 @@ Resource Types:
       <td>true</td>
       </tr>
       <tr>
-      <td><b><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta">metadata</a></b></td>
+      <td><b><a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta">metadata</a></b></td>
       <td>object</td>
       <td>Refer to the Kubernetes API documentation for the fields of the `metadata` field.</td>
       <td>true</td>
@@ -68,7 +68,7 @@ Resource Types:
       {{- end -}}
       {{- range .Fields -}}
       <tr>
-        <td><b>{{if .TypeKey}}<a href="{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
+        <td><b>{{if .TypeKey}}<a href="#{{.TypeKey}}">{{.Name}}</a>{{else}}{{.Name}}{{end}}</b></td>
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>
