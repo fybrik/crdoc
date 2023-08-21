@@ -22,3 +22,5 @@ out/
 .vscode
 .history
 .netrc
+
+dist/
