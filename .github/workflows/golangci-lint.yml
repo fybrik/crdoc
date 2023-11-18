@@ -14,9 +14,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.19
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3.6.0
+        uses: golangci/golangci-lint-action@v3.7.0
         with:
           version: latest
           args: --timeout 5m
