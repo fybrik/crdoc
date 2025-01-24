@@ -113,5 +113,14 @@ Resource Types:
           Just text<br/>
         </td>
         <td>false</td>
+      </tr><tr>
+        <td><b>zones</b></td>
+        <td>[]enum</td>
+        <td>
+          Some zones<br/>
+          <br/>
+            <i>Enum</i>: A, B<br/>
+        </td>
+        <td>false</td>
       </tr></tbody>
 </table>
