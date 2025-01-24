@@ -178,6 +178,9 @@ func (b *ModelBuilder) addTypeModels(groupModel *GroupModel, kindModel *KindMode
 		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
 			fmt.Sprintf("%s[index]", name), schema.Items.Schema, false)
 		return "[]" + childTypeName, childTypeModel
+	} else if typeName == "[]enum" {
+		schema.Enum = schema.Items.Schema.Enum
+		return typeName, nil
 	} else if typeName == "map[string]" {
 		childTypeName, childTypeModel := b.addTypeModels(groupModel, kindModel,
 			fmt.Sprintf("%s[key]", name), schema.AdditionalProperties.Schema, false)
@@ -230,6 +233,9 @@ func getTypeName(props *apiextensions.JSONSchemaProps) string {
 	if props.Type == "array" {
 		if props.Items == nil {
 			return "[]object"
+		}
+		if len(props.Items.Schema.Enum) > 0 {
+			return "[]enum"
 		}
 		return "[]"
 	}

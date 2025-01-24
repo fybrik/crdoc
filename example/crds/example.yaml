@@ -43,6 +43,14 @@ spec:
                     enum:
                       - East
                       - West
+                  zones:
+                    description: Some zones
+                    items:
+                      enum:
+                      - A
+                      - B
+                      type: string
+                    type: array
                 type: object
               type: object
             type: array
