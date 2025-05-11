@@ -193,6 +193,7 @@ func (b *ModelBuilder) createKey(name string) string {
 	key := functions.Anchorize(name)
 	if value, exists := b.keys[key]; exists {
 		value++
+		b.keys[key] = value
 		key = fmt.Sprintf("%s-%d", key, value)
 	} else {
 		b.keys[key] = 0
