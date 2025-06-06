@@ -1,13 +1,13 @@
 module fybrik.io/crdoc
 
-go 1.19
+go 1.23.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.17.0
-	golang.org/x/text v0.21.0
+	golang.org/x/text v0.26.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apiextensions-apiserver v0.27.4
 	k8s.io/apimachinery v0.29.0
