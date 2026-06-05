@@ -29,12 +29,7 @@ jobs:
       - name: 'Verify input version'
         if: github.event.inputs.version != steps.semvers.outputs.v_major && github.event.inputs.version != steps.semvers.outputs.v_minor && github.event.inputs.version != steps.semvers.outputs.v_patch
         run: exit 1
-      - name: 'Update version file'
-        run: echo ${{ github.event.inputs.version }} >VERSION
-      - name: 'Commit and tag'
-        uses: EndBug/add-and-commit@v9
-        with:
-          default_author: github_actions
-          message: Update version number
-          add: 'VERSION'
-          tag: ${{ github.event.inputs.version }}
+      - name: 'Create and push tag'
+        run: |
+          git tag ${{ github.event.inputs.version }}
+          git push origin ${{ github.event.inputs.version }}

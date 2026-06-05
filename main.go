@@ -25,8 +25,9 @@ const (
 //go:embed templates/*
 var builtinTemplates embed.FS
 
-//go:embed VERSION
-var version string
+// version is set at build time via -ldflags "-X main.version=...".
+// GoReleaser injects the git tag here; it defaults to "dev" for plain builds.
+var version = "dev"
 
 // RootCmd defines the root cli command
 func RootCmd() *cobra.Command {
@@ -49,7 +50,7 @@ func RootCmd() *cobra.Command {
 		PreRun: func(cmd *cobra.Command, args []string) {
 			_ = viper.BindPFlags(cmd.Flags())
 		},
-		Version: strings.TrimSpace(version),
+		Version: version,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outputOptionValue := viper.GetString(outputOption)
 			templateOptionValue := viper.GetString(templateOption)
