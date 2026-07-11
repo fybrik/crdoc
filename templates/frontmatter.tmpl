@@ -72,7 +72,7 @@ Resource Types:
         <td>{{.Type}}</td>
         <td>
           {{.Description}}<br/>
-          {{- if or .Schema.XValidations .Schema.Format .Schema.Enum .Schema.Default .Schema.Minimum .Schema.Maximum }}
+          {{- if or .Schema.XValidations .Schema.Format .Schema.Enum .Schema.Default .Schema.Minimum .Schema.Maximum .Schema.MinLength .Schema.MaxLength .Schema.Pattern }}
           <br/>
           {{- end}}
           {{- if .Schema.XValidations }}
@@ -95,6 +95,15 @@ Resource Types:
           {{- end }}
           {{- if .Schema.Maximum }}
             <i>Maximum</i>: {{ .Schema.Maximum }}<br/>
+          {{- end }}
+          {{- if .Schema.MinLength }}
+            <i>Min Length</i>: {{ .Schema.MinLength }}<br/>
+          {{- end }}
+          {{- if .Schema.MaxLength }}
+            <i>Max Length</i>: {{ .Schema.MaxLength }}<br/>
+          {{- end }}
+          {{- if .Schema.Pattern }}
+            <i>Pattern</i>: {{ .Schema.Pattern | html }}<br/>
           {{- end }}
         </td>
         <td>{{.Required}}</td>

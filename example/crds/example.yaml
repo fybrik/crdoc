@@ -37,6 +37,9 @@ spec:
                   text:
                     description: Just text
                     type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^(East|West)-[a-z0-9]+$
                   area:
                     type: string
                     description: Some area

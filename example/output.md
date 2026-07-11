@@ -111,6 +111,10 @@ Resource Types:
         <td>string</td>
         <td>
           Just text<br/>
+          <br/>
+            <i>Min Length</i>: 1<br/>
+            <i>Max Length</i>: 64<br/>
+            <i>Pattern</i>: ^(East|West)-[a-z0-9]+$<br/>
         </td>
         <td>false</td>
       </tr><tr>
