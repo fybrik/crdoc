@@ -1,0 +1,35 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: widgets.test.io
+spec:
+  group: test.io
+  names:
+    kind: Widget
+    listKind: WidgetList
+    plural: widgets
+    singular: widget
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          minOnly:
+            description: A field with only a minLength bound.
+            type: string
+            minLength: 1
+          maxOnly:
+            description: A field with only a maxLength bound.
+            type: string
+            maxLength: 64
+          patternOnly:
+            description: A field with only a pattern, exercising escaping.
+            type: string
+            # Contains a named capture group ('<', '>') and an entity-like
+            # sequence ('&') so the HTML templates must escape them, plus a '|'
+            # alternation so the AsciiDoc template must escape the cell separator.
+            pattern: ^(?P<side>East|West)&copy;$

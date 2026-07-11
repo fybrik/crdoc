@@ -79,6 +79,15 @@ a| {{.Description}}
 {{ if .Schema.Maximum -}}
 * _Maximum_: {{ .Schema.Maximum }}
 {{ end -}}
+{{ if .Schema.MinLength -}}
+* _Min Length_: {{ .Schema.MinLength }}
+{{ end -}}
+{{ if .Schema.MaxLength -}}
+* _Max Length_: {{ .Schema.MaxLength }}
+{{ end -}}
+{{ if .Schema.Pattern -}}
+* _Pattern_: {{ .Schema.Pattern | replace "|" "\\|" }}
+{{ end -}}
 
 | {{.Required}}
 
